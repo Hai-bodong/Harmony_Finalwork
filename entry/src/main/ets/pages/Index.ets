@@ -12,7 +12,7 @@ struct Index {
 
       Tabs( { barPosition:BarPosition.End } ){
         TabContent() {
-
+        
         }
         .tabBar('首页')
 
@@ -33,7 +33,6 @@ struct Index {
         }.tabBar('我')
       }
     }
-    // .backgroundColor(Color.Gray)
     .height('100%')
     .width('100%')
   }
