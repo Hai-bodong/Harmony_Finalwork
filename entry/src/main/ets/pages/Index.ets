@@ -1,4 +1,3 @@
-// index.ets
 import router from '@ohos.router';
 import { display } from '@kit.ArkUI';
 
@@ -9,12 +8,13 @@ struct Index {
   @State cardWidth: number = 280;
   @State cardHeight: number = 400;
   @State currentTabIndex: number = 0;
+  @State currentBottomTab: number = 0 // 默认选中"首页"的标签页
 
   aboutToAppear() {
     this.calculateCardSize();
     setTimeout(() => {
       this.showPrompt = false;
-    }, 5000);
+    }, 1000);
   }
 
   calculateCardSize() {
@@ -43,13 +43,13 @@ struct Index {
           }
           .width('100%')
           .height('100%')
-          .backgroundColor('#121212');
+          .backgroundColor(Color.White);
 
           // Logo
           Text('HarmonyOS 音视频')
             .fontSize(24)
             .fontWeight(FontWeight.Bold)
-            .fontColor(Color.White)
+            .fontColor(Color.Black)
             .margin({ top: 20 })
             .align(Alignment.Top);
 
@@ -265,8 +265,20 @@ struct Index {
     .barWidth('100%')
     .barHeight(60)
     .onChange((index: number) => {
-      this.currentTabIndex = index;
-    });
+      this.currentBottomTab = index
+      // 这里可以添加页面跳转逻辑
+      if (index === 0) {
+        router.pushUrl({ url: 'pages/Index' })
+      } else if (index === 1) {
+        router.pushUrl({ url: 'pages/Discover' })
+      } else if (index === 2) {
+        router.pushUrl({ url: 'pages/Create' })
+      } else if (index === 3) {
+        router.pushUrl({ url: 'pages/Message' })
+      } else if (index === 4) {
+        router.pushUrl({url: 'pages/ProfileCenter'})
+      }
+    })
   }
 
   @Builder TabBuilder(title: string, index: number, icon: Resource) {
