@@ -1,9 +1,9 @@
 {
   "src": [
     "pages/Index",
-    "pages/create",
-    "pages/find",
-    "pages/message",
-    "pages/mine"
+    "pages/Discover",
+    "pages/Create",
+    "pages/Message",
+    "pages/ProfileCenter"
   ]
 }
