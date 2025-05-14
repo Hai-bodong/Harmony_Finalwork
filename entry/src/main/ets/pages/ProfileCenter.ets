@@ -31,14 +31,14 @@ struct ProfileCenter {
         Text('用户昵称')
           .fontSize(22)
           .fontWeight(FontWeight.Bold)
-          .fontColor(Color.Black)
+          .fontColor(Color.White)
           .margin({ bottom: 8 })
 
         // 简介
         TextInput({placeholder:'这是个人简介，分享你的个人生活与态度'})
           .type(InputType.Normal)
           .fontSize(14)
-          .fontColor('rgba(0,0,0,0.8)')
+          .fontColor(Color.White)
           .margin({ bottom: 15 })
           .textAlign(TextAlign.Center)
 
@@ -48,30 +48,30 @@ struct ProfileCenter {
             Text('168')
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
-              .fontColor(Color.Black)
+              .fontColor(Color.White)
             Text('关注')
               .fontSize(12)
-              .fontColor('rgba(0,0,0,0.8)')
+              .fontColor(Color.White)
           }
 
           Column() {
             Text('286')
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
-              .fontColor(Color.Black)
+              .fontColor(Color.White)
             Text('粉丝')
               .fontSize(12)
-              .fontColor('rgba(0,0,0,0.8)')
+              .fontColor(Color.White)
           }
 
           Column() {
             Text('42')
               .fontSize(18)
               .fontWeight(FontWeight.Bold)
-              .fontColor(Color.Black)
+              .fontColor(Color.White)
             Text('获赞')
               .fontSize(12)
-              .fontColor('rgba(0,0,0,0.8)')
+              .fontColor(Color.White)
           }
         }
         .margin({ bottom: 20 })
@@ -82,14 +82,14 @@ struct ProfileCenter {
           .height(30)
           .fontSize(14)
           .backgroundColor('#FF0050')
-          .fontColor(Color.White)
+          .fontColor(Color.Black)
           .margin({ bottom: 20 })
 
         // 内容标签页
         Row({ space: 0 }) {
           Text('收藏')
             .fontSize(16)
-            .fontColor(this.currentTab === 'collections' ? '#FF0050' : 'rgba(0,0,0,0.7)')
+            .fontColor(this.currentTab === 'collections' ? '#FF0050' : '#FFF')
             .padding(10)
             .border({ width: { bottom: this.currentTab === 'collections' ? 2 : 0 }, color: '#FF0050' })
             .onClick(() => {
@@ -98,7 +98,7 @@ struct ProfileCenter {
 
           Text('作品')
             .fontSize(16)
-            .fontColor(this.currentTab === 'works' ? '#FF0050' : 'rgba(0,0,0,0.7)')
+            .fontColor(this.currentTab === 'works' ? '#FF0050' : '#FFF')
             .padding(10)
             .border({ width: { bottom: this.currentTab === 'works' ? 2 : 0 }, color: '#FF0050' })
             .onClick(() => {
@@ -107,7 +107,7 @@ struct ProfileCenter {
 
           Text('喜欢')
             .fontSize(16)
-            .fontColor(this.currentTab === 'likes' ? '#FF0050' : 'rgba(0,0,0,0.7)')
+            .fontColor(this.currentTab === 'likes' ? '#FF0050' : '#FFF')
             .padding(10)
             .border({ width: { bottom: this.currentTab === 'likes' ? 2 : 0 }, color: '#FF0050' })
             .onClick(() => {
@@ -116,7 +116,7 @@ struct ProfileCenter {
 
           Text('历史')
             .fontSize(16)
-            .fontColor(this.currentTab === 'history' ? '#FF0050' : 'rgba(0,0,0,0.7)')
+            .fontColor(this.currentTab === 'history' ? '#FF0050' : '#FFF')
             .padding(10)
             .border({ width: { bottom: this.currentTab === 'history' ? 2 : 0 }, color: '#FF0050' })
             .onClick(() => {
@@ -233,7 +233,7 @@ struct ProfileCenter {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(Color.White)
+    .backgroundColor(Color.Black)
   }
 
   @Builder ContentItem(image: Resource, likes: number) {
