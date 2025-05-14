@@ -206,30 +206,127 @@ struct ProfileCenter {
       .margin({ top: '40%' })
 
       // 底部导航栏
-      Tabs({ barPosition: BarPosition.End, index: this.currentBottomTab }) {
-        TabContent() {}.tabBar(this.TabBuilder('首页', 0, $r('app.media.icon_home')))
-        TabContent() {}.tabBar(this.TabBuilder('发现', 1, $r('app.media.icon_search')))
-        TabContent() {}.tabBar(this.TabBuilder('创建', 2, $r('app.media.icon_add')))
-        TabContent() {}.tabBar(this.TabBuilder('消息', 3, $r('app.media.icon_message')))
-        TabContent() {}.tabBar(this.TabBuilder('我', 4, $r('app.media.icon_profile')))
-      }
-      .barMode(BarMode.Fixed)
-      .barWidth('100%')
-      .barHeight(60)
-      .onChange((index: number) => {
-        this.currentBottomTab = index
-        // 这里可以添加页面跳转逻辑
-        if (index === 0) {
-          router.pushUrl({ url: 'pages/Index' })
-        } else if (index === 1) {
-          router.pushUrl({ url: 'pages/Discover' })
-        } else if (index === 2) {
-          router.pushUrl({ url: 'pages/Create' })
-        } else if (index === 3) {
-          router.pushUrl({ url: 'pages/Message' })
+      Row() {
+        // 首页
+        Column() {
+          Image($r('app.media.icon_home'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 0 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('首页')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 0 ? '#FF0050' : '#FFFFFF');
         }
-      })
-      .position({ x: 0, y: '100% - 60vp' })
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 0;
+          router.pushUrl({ url: 'pages/Index' });
+        });
+
+        // 发现
+        Column() {
+          Image($r('app.media.icon_find'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('发现')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 1;
+          router.pushUrl({ url: 'pages/Discover' });
+        });
+
+        // 创建
+        Column() {
+          Image($r('app.media.icon_add'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('创建')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 2;
+          router.pushUrl({ url: 'pages/Create' });
+        });
+
+        // 消息
+        Column() {
+          Image($r('app.media.icon_message'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('消息')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 3;
+          router.pushUrl({ url: 'pages/Message' });
+        });
+
+        // 我
+        Column() {
+          Image($r('app.media.icon_profile'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('我')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 4;
+          router.pushUrl({ url: 'pages/ProfileCenter' });
+        });
+      }
+      .width('100%')
+      .height(60)
+      .backgroundColor('#1E1E1E')
+      .position({ x: 0, y: '100%' })
+      .translate({ y: -60 });
     }
     .width('100%')
     .height('100%')
