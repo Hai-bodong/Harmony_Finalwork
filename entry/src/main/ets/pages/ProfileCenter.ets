@@ -10,9 +10,9 @@ struct ProfileCenter {
     Stack({ alignContent: Alignment.TopStart }) {
       // 返回按钮
       Image($r('app.media.icon_back'))
-        .width(30)
-        .height(30)
-        .margin({ top: 20, left: 20 })
+        .width(24)
+        .height(24)
+        .margin({ top: 18, left: 18 })
         .onClick(() => {
           router.back()
         })
