@@ -112,7 +112,7 @@ struct Discover {
                   .border({ radius: 8 })
                   .margin({ right: 10 })
                 if (this.playIndex === index) {
-                  Image($r('app.media.wave'))
+                  Image($r('app.media.ic_wave'))
                     .width(24)
                 }
               }
