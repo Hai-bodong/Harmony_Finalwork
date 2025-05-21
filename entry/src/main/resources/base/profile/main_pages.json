@@ -5,6 +5,7 @@
     "pages/Discover",
     "pages/Create",
     "pages/Message",
-    "pages/ProfileCenter"
+    "pages/ProfileCenter",
+    "pages/AudioPlayer"
   ]
 }

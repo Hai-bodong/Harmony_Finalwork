@@ -94,7 +94,7 @@ struct Discover {
 
   build() {
     Column() {
-      Text('猜你喜欢')
+      Text('发现你喜欢')
         .fontColor('#fff')
         .width('100%')
         .margin({ bottom: 10 })
