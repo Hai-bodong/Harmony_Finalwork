@@ -6,6 +6,7 @@
     "pages/Create",
     "pages/Message",
     "pages/ProfileCenter",
-    "pages/AudioPlayer"
+    "pages/AudioPlayer",
+    "pages/TikTokStyle"
   ]
 }

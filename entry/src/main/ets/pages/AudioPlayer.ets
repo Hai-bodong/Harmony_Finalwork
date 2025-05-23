@@ -1,12 +1,17 @@
 import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-//import { Curve, ImageAnimator, AnimationStatus } from '@kit.ArkUI'; // 导入必要的模块
+import { hilog } from '@kit.PerformanceAnalysisKit';// 导入必要的模块
 
 const DOMAIN_AUDIO_PLAYER_PAGE = 0x0003;
 
 @Entry
 @Component
 struct AudioPlayer {
+  //图标激活状态
+  @State isCollectActive: boolean = false;
+  @State isShareActive: boolean = false;
+  @State showLikePlusOne: boolean = false;
+  @State plusOneOpacity: number = 0;
+  @State plusOneOffsetY: number = 0;
   // 专辑封面旋转角度
   @State albumRotation: number = 0;
   // 控制专辑封面旋转动画的开关
@@ -21,16 +26,6 @@ struct AudioPlayer {
   @State currentTime: number = 0;
   // 总时长 (秒)
   @State totalTime: number = 225; // 示例：3分45秒
-
-  // 模拟音律跳动动画的帧 (如果使用 ImageAnimator)
-  // 你需要将这些替换为你的GIF帧序列图片资源
-  // @State animatorFrames: ImageAnimator.Frame[] = [
-  //   { src: $r('app.media.visualizer_frame1'), duration: 100 },
-  //   { src: $r('app.media.visualizer_frame2'), duration: 100 },
-  //   { src: $r('app.media.visualizer_frame3'), duration: 100 },
-  //   // ... 更多帧
-  // ];
-  // @State animatorState: AnimationStatus = AnimationStatus.RUNNING; // 动画状态
 
   // 定时器ID，用于控制专辑封面旋转和进度条
   private albumRotateTimerId: number = -1;
@@ -114,7 +109,7 @@ struct AudioPlayer {
         colors: [[0x8A2387, 0.0], [0xE94057, 0.5], [0xF27121, 1.0]] // 渐变颜色
       })
       .animation({
-        duration: 15000, // 15秒动画周期
+        duration: 5000, // 15秒动画周期
         iterations: -1, // 无限循环
         curve: Curve.Linear,
         playMode: PlayMode.Alternate // 交替播放
@@ -127,7 +122,7 @@ struct AudioPlayer {
           .height(24)
           .margin({ left: 16 })
           .onClick(() => {
-            router.back();
+            router.pushUrl({ url: 'pages/Index' });
           });
 
         Text('音乐播放')
@@ -258,15 +253,49 @@ struct AudioPlayer {
       Column({ space: 25 }) { // 增加间距
         // 爱心图标
         Column({ space: 5 }) {
-          Image(this.isLiked ? $r('app.media.icon_liked') : $r('app.media.icon_like')) // 爱心图标
-            .width(40)
-            .height(40)
-            .borderRadius(20)
-            .backgroundColor('rgba(255, 255, 255, 0.2)')
-            .onClick(() => {
-              this.isLiked = !this.isLiked;
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Like clicked, isLiked: ${this.isLiked}`);
-            });
+          Stack({ alignContent: Alignment.Center }) { // 使用Stack包裹爱心图标和+1提示
+            Image(this.isLiked ? $r('app.media.icon_liked') : $r('app.media.icon_like')) // 爱心图标
+              .width(40)
+              .height(40)
+              .borderRadius(20)
+              .backgroundColor('rgba(255, 255, 255, 0.2)')
+              .onClick(() => {
+                this.isLiked = !this.isLiked;
+                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Like clicked, isLiked: ${this.isLiked}`);
+
+                // "+1" 提示动效
+                this.showLikePlusOne = true;
+                this.plusOneOpacity = 1; // 初始完全不透明
+                this.plusOneOffsetY = 0; // 初始位置
+
+                animateTo({ curve: Curve.EaseOut, duration: 500 }, () => {
+                  this.plusOneOffsetY = -50; // 向上移动50px
+                  this.plusOneOpacity = 0;   // 渐隐
+                });
+
+                // 动画结束后重置状态，以便下次点击时再次显示
+                setTimeout(() => {
+                  this.showLikePlusOne = false;
+                  this.plusOneOpacity = 0; // 确保完全隐藏
+                  this.plusOneOffsetY = 0; // 重置位置
+                }, 5000); // 匹配动画持续时间
+              });
+
+            // "+1" 提示文本
+            if (this.showLikePlusOne) {
+              Text('+1')
+                .fontSize(25)
+                .fontColor('rgb(0, 135, 189)')
+                .fontWeight(FontWeight.Bold)
+                .opacity(this.plusOneOpacity)
+                .offset({ y: this.plusOneOffsetY })
+                .position({ x: '50%', y: '50%' }) // 相对于Stack居中
+                .offset({ x: 0, y: -50 }); // 微调位置，使其在图标上方
+            }
+          }
+          .width(40) // Stack宽度与图标一致
+          .height(40); // Stack高度与图标一致
+
           Text('5.7w') // 示例点赞数
             .fontSize(12)
             .fontColor(Color.White);
@@ -286,11 +315,16 @@ struct AudioPlayer {
 
         // 分享图标
         Column({ space: 5 }) {
-          Image($r('app.media.icon_share')) // 分享图标
+          Image(this.isShareActive ? $r('app.media.icon_share') : $r('app.media.icon_shared')) // 分享图标
             .width(40)
             .height(40)
             .borderRadius(20)
-            .backgroundColor('rgba(255, 255, 255, 0.2)');
+            .backgroundColor('rgba(255, 255, 255, 0.2)')
+            .onClick(() => {
+              this.isShareActive = !this.isShareActive; // 切换状态
+              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Share clicked, isActive: ${this.isShareActive}`);
+              // TODO: 分享功能
+            });
           Text('分享')
             .fontSize(12)
             .fontColor(Color.White);
@@ -298,11 +332,16 @@ struct AudioPlayer {
 
         // 收藏图标
         Column({ space: 5 }) {
-          Image($r('app.media.icon_collect')) // 收藏图标
+          Image(this.isCollectActive ? $r('app.media.icon_collected') : $r('app.media.icon_collect')) // 收藏图标
             .width(40)
             .height(40)
             .borderRadius(20)
-            .backgroundColor('rgba(255, 255, 255, 0.2)');
+            .backgroundColor('rgba(255, 255, 255, 0.2)')
+            .onClick(() => {
+              this.isCollectActive = !this.isCollectActive; // 切换状态
+              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Collect clicked, isActive: ${this.isCollectActive}`);
+              // TODO: 收藏功能
+            });
           Text('收藏')
             .fontSize(12)
             .fontColor(Color.White);
