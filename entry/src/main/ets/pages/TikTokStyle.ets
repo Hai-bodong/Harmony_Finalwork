@@ -1,5 +1,20 @@
 import router from '@ohos.router';
+import hilog from '@ohos.hilog';
 import {Videoaction,Videoitem}from '../Support/VideoSupport'
+
+const DOMAIN_TIKTOK_STYLE: number = 0x0001;
+
+// 定义视频数据类型
+interface VideoItem {
+  id: number;
+  url: Resource;
+  author: string;
+  description: string;
+  likes: number;
+  comments: number;
+  avatar: Resource;
+}
+
 @Entry
 @Component
 struct TikTokStyle {
@@ -7,7 +22,45 @@ struct TikTokStyle {
   @State isPlaying: boolean = true
   @State likeCount: number = 12000
   @State commentCount: number = 2312
+  @State isLiked: boolean = false // 是否已点赞
   @State showFloatingWindow: boolean = true
+  @State currentBottomTab: number = 2
+  @State isShareActive: boolean = false; // 是否激活分享功能
+  @State isCollected: boolean = false; // 是否已收藏
+  @State currentVideoIndex: number = 0; // 当前播放的视频索引
+
+  private videoList:  Array<VideoItem>= [
+    {
+      id: 1,
+      url: $r('app.media.background1'),
+      author: '用户123',
+      description: '这是一段精彩的视频内容',
+      likes: 1500,
+      comments: 230,
+      avatar: $r('app.media.profile2')
+    },
+    {
+      id: 2,
+      url: $r('app.media.background1'),
+      author: '创意达人',
+      description: '分享美好生活瞬间',
+      likes: 8900,
+      comments: 560,
+      avatar: $r('app.media.logo')
+    },
+    {
+      id: 3,
+      url: $r('app.media.background1'),
+      author: '旅行家小张',
+      description: '探索未知的世界',
+      likes: 12400,
+      comments: 890,
+      avatar: $r('app.media.profile2')
+    }
+  ];
+
+
+
 
   build() {
     Stack() {
@@ -18,17 +71,19 @@ struct TikTokStyle {
         controller: new VideoController()
       })
         .width('100%')
-        .height('100%')
+        .height('85%')
         .objectFit(ImageFit.Cover)
         .autoPlay(true)
         .loop(true)
         .muted(true)
+      
 
       // 顶部导航
       Row() {
         ForEach(['关注', '推荐', '热门'], (tab: string) => {
           Text(tab)
             .fontSize(18)
+            .fontColor(Color.White)
             .fontWeight(this.currentTab === tab ? FontWeight.Bold : FontWeight.Normal)
             .opacity(this.currentTab === tab ? 1.0 : 0.7)
             .margin({ left: 20, right: 20 })
@@ -38,35 +93,88 @@ struct TikTokStyle {
         })
       }
       .width('100%')
-      .height(56)
+      .height('5%')
       .backgroundColor('rgba(0, 0, 0, 0.5)')
       .position({ x: 0, y: 0 })
+      .justifyContent(FlexAlign.Center)
 
-      // 侧边操作按钮
-      Column() {
-        ForEach([
-          { icon: '❤️', label: this.likeCount.toString() },
-          { icon: '💬', label: this.commentCount.toString() },
-          { icon: '⤴️', label: '分享' },
-          { icon: '♫', label: '音乐' }
-        ], (action:Videoaction) => {
-          Column() {
-            Text(action.icon)
-              .fontSize(24)
-              .width(40)
-              .height(40)
-              .backgroundColor('rgba(255, 255, 255, 0.2)')
-              .borderRadius(20)
-              .textAlign(TextAlign.Center)
-            Text(action.label)
-              .fontSize(12)
-              .margin({ top: 4 })
-          }
-          .margin({ bottom: 20 })
-        })
+      Column(){
+        // 点赞按钮
+        Column({ space: 5 }) {
+          Image(this.isLiked ? $r('app.media.icon_like1') : $r('app.media.icon_liked1'))
+            .width(40)
+            .height(40)
+            .borderRadius(20)
+            .onClick(() => {
+              this.isLiked = !this.isLiked;
+              if (this.isLiked) {
+                this.likeCount += 1;
+              } else {
+                this.likeCount -= 1;
+              }
+            });
+
+          Text(`${this.likeCount}`)
+            .fontSize(12)
+            .fontColor(Color.White);
+        }
+        .margin({ bottom: 20 })
+
+        // 评论按钮
+        Column({ space: 5 }) {
+          Image($r('app.media.ic_comment'))
+            .width(40)
+            .height(40)
+            .borderRadius(20)
+          Text(`${this.commentCount}`)
+            .fontSize(12)
+            .fontColor(Color.White);
+        }
+        .margin({ bottom: 20 })
+
+        // 收藏按钮
+        Column({ space: 5 }) {
+          Image(this.isCollected ? $r('app.media.icon_collected') : $r('app.media.icon_collect'))
+            .width(40)
+            .height(40)
+            .borderRadius(20)
+            .onClick(() => {
+              this.isCollected = !this.isCollected;
+              if (this.isCollected) {
+                hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video added to favorites');
+              } else {
+                hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video removed from favorites');
+              }
+            });
+
+          Text(this.isCollected ? '已收藏' : '收藏')
+            .fontSize(12)
+            .fontColor(Color.White);
+        }
+        .margin({ bottom: 20 })
+
+        // 分享按钮
+        Column({ space: 5 }) {
+          Image(this.isShareActive ? $r('app.media.icon_share') : $r('app.media.icon_shared'))
+            .width(40)
+            .height(40)
+            .borderRadius(20)
+            .onClick(() => {
+              this.isShareActive = !this.isShareActive;
+              hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Share button clicked');
+              // 可以在此处调用系统分享 API 或跳转至分享页面
+            });
+
+          Text('分享')
+            .fontSize(12)
+            .fontColor(Color.White);
+        }
+        .margin({ bottom: 20 })
       }
+      .margin({ bottom: 20 })
       .position({ x: '90%', y: '50%' })
       .translate({ x: -20, y: -100 })
+
 
       // 底部视频信息
       Column() {
@@ -110,38 +218,126 @@ struct TikTokStyle {
 
       // 底部导航栏
       Row() {
-        ForEach([
-          { icon: '🏠', label: '首页' },
-          { icon: '🔍', label: '发现' },
-          { icon: '+', label: '创建' },
-          { icon: '💬', label: '消息' },
-          { icon: '👤', label: '我' }
-        ], (item:Videoitem) => {
-          Column() {
-            if (item.icon === '+') {
-              Text(item.icon)
-                .fontSize(24)
-                .width(40)
-                .height(40)
-                .backgroundColor('#FF0050')
-                .borderRadius(8)
-                .textAlign(TextAlign.Center)
-            } else {
-              Text(item.icon)
-                .fontSize(24)
-            }
-            Text(item.label)
-              .fontSize(12)
-              .margin({ top: 4 })
-          }
-          .margin({ left: 20, right: 20 })
-        })
+        // 首页
+        Column() {
+          Image($r('app.media.icon_home'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 0 ? '#F0000' : '#FFFFFF'
+            });
+
+          Text('首页')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 0 ? '#F0000' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 0;
+          router.pushUrl({ url: 'pages/Index' });
+        });
+
+        // 发现
+        Column() {
+          Image($r('app.media.icon_find'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('发现')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 1;
+          router.pushUrl({ url: 'pages/Discover' });
+        });
+
+        // 创建
+        Column() {
+          Image($r('app.media.icon_add'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('创建')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 2;
+          router.pushUrl({ url: 'pages/Create' });
+        });
+
+        // 消息
+        Column() {
+          Image($r('app.media.icon_message'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('消息')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 3;
+          router.pushUrl({ url: 'pages/Message' });
+        });
+
+        // 我
+        Column() {
+          Image($r('app.media.icon_profile'))
+            .width(24)
+            .height(24)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 4 })
+            .colorFilter({
+              color: this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF'
+            });
+
+          Text('我')
+            .fontSize(12)
+            .fontColor(this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF');
+        }
+        .width('20%')
+        .height('100%')
+        .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.currentBottomTab = 4;
+          router.pushUrl({ url: 'pages/ProfileCenter' });
+        });
       }
       .width('100%')
-      .height(56)
-      .backgroundColor('rgba(0, 0, 0, 0.5)')
+      .height(60)
+      .backgroundColor('#1E1E1E')
       .position({ x: 0, y: '100%' })
-      .translate({ y: -56 })
+      .translate({ y: -60 });
 
       // 悬浮窗
       if (this.showFloatingWindow) {
@@ -165,3 +361,6 @@ struct TikTokStyle {
     .backgroundColor(Color.Black)
   }
 }
+
+
+
