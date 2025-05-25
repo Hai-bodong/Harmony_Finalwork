@@ -29,35 +29,7 @@ struct TikTokStyle {
   @State isCollected: boolean = false; // 是否已收藏
   @State currentVideoIndex: number = 0; // 当前播放的视频索引
 
-  private videoList:  Array<VideoItem>= [
-    {
-      id: 1,
-      url: $r('app.media.background1'),
-      author: '用户123',
-      description: '这是一段精彩的视频内容',
-      likes: 1500,
-      comments: 230,
-      avatar: $r('app.media.profile2')
-    },
-    {
-      id: 2,
-      url: $r('app.media.background1'),
-      author: '创意达人',
-      description: '分享美好生活瞬间',
-      likes: 8900,
-      comments: 560,
-      avatar: $r('app.media.logo')
-    },
-    {
-      id: 3,
-      url: $r('app.media.background1'),
-      author: '旅行家小张',
-      description: '探索未知的世界',
-      likes: 12400,
-      comments: 890,
-      avatar: $r('app.media.profile2')
-    }
-  ];
+
 
 
 
