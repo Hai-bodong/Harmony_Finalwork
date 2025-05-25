@@ -20,25 +20,61 @@ interface VideoItem {
 struct TikTokStyle {
   @State currentTab: string = '推荐'
   @State isPlaying: boolean = true
-  @State likeCount: number = 12000
-  @State commentCount: number = 2312
+  // @State likeCount: number = 12000
+  // @State commentCount: number = 2312
   @State isLiked: boolean = false // 是否已点赞
   @State showFloatingWindow: boolean = true
   @State currentBottomTab: number = 2
   @State isShareActive: boolean = false; // 是否激活分享功能
   @State isCollected: boolean = false; // 是否已收藏
   @State currentVideoIndex: number = 0; // 当前播放的视频索引
+  @State private startY: number = 0
+  @State private currentY: number = 0
+  @State private videoSrc: Resource = $r('app.media.dancing')
+  // 添加视频列表数据
+  private videoList: VideoItem[] = [
+    {
+      id: 1,
+      url: $r('app.media.dancing'),
+      author: '舞蹈达人',
+      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      likes: 12000,
+      comments: 2312,
+      avatar: $r('app.media.profile1')
+    },
+    {
+      id: 2,
+      url: $r('app.media.video1'),
+      author: '舞蹈达人',
+      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      likes: 15000,
+      comments: 3000,
+      avatar: $r('app.media.profile1')
+    }
+  ]
 
+  // 视频控制器
+  private videoController: VideoController = new VideoController()
 
-
-
-
+  // 处理视频切换
+  private switchVideo(direction: number) {
+    const newIndex = this.currentVideoIndex + direction
+    if (newIndex >= 0 && newIndex < this.videoList.length) {
+      this.currentVideoIndex = newIndex
+      // this.videoController.stop()
+      // setTimeout(() => {
+      //   this.videoController.start()
+      // }, 100)
+      this.videoSrc = this.videoList[this.currentVideoIndex].url
+    }
+  }
 
   build() {
     Stack() {
       // 视频容器
       Video({
-        src: $r('app.media.dancing'),
+        // src: this.videoList[this.currentVideoIndex].url,
+        src: this.videoSrc,
         currentProgressRate: 1.0,
         controller: new VideoController()
       })
@@ -48,7 +84,31 @@ struct TikTokStyle {
         .autoPlay(true)
         .loop(true)
         .muted(true)
-      
+        .gesture(
+          PanGesture()
+            .onActionStart((event: GestureEvent) => {
+              this.startY = event.offsetY
+            })
+            .onActionUpdate((event: GestureEvent) => {
+              this.currentY = event.offsetY
+            })
+            .onActionEnd(() => {
+              const distance = this.currentY - this.startY
+              if (Math.abs(distance) > 50) { // 设置最小滑动距离
+                if (distance > 0) {
+                  // 向下滑动
+                  if (this.currentVideoIndex < this.videoList.length - 1) {
+                    this.switchVideo(1)
+                  }
+                } else {
+                  // 向上滑动
+                  if (this.currentVideoIndex > 0) {
+                    this.switchVideo(-1)
+                  }
+                }
+              }
+            })
+        )
 
       // 顶部导航
       Row() {
@@ -80,13 +140,13 @@ struct TikTokStyle {
             .onClick(() => {
               this.isLiked = !this.isLiked;
               if (this.isLiked) {
-                this.likeCount += 1;
+                this.videoList[this.currentVideoIndex].likes += 1;
               } else {
-                this.likeCount -= 1;
+                this.videoList[this.currentVideoIndex].likes -= 1;
               }
             });
 
-          Text(`${this.likeCount}`)
+          Text(`${this.videoList[this.currentVideoIndex].likes}`)
             .fontSize(12)
             .fontColor(Color.White);
         }
@@ -98,7 +158,7 @@ struct TikTokStyle {
             .width(40)
             .height(40)
             .borderRadius(20)
-          Text(`${this.commentCount}`)
+          Text(`${this.videoList[this.currentVideoIndex].comments}`)
             .fontSize(12)
             .fontColor(Color.White);
         }
@@ -151,16 +211,16 @@ struct TikTokStyle {
       // 底部视频信息
       Column() {
         Row() {
-          Image($r('app.media.profile1'))
+          Image(this.videoList[this.currentVideoIndex].avatar)
             .width(50)
             .height(50)
             .borderRadius(25)
-          Text('@舞蹈达人')
+          Text('@' + this.videoList[this.currentVideoIndex].author)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
             .margin({ left: 10 })
         }
-        Text('街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐')
+        Text(this.videoList[this.currentVideoIndex].description)
           .fontSize(14)
           .margin({ top: 10 })
         Row() {
@@ -314,7 +374,7 @@ struct TikTokStyle {
       // 悬浮窗
       if (this.showFloatingWindow) {
         Video({
-          src: $r('app.media.dancing'),
+          src: this.videoList[this.currentVideoIndex].url,
           currentProgressRate: 1.0,
           controller: new VideoController()
         })
