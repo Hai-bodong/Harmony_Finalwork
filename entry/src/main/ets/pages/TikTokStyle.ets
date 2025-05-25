@@ -20,8 +20,6 @@ interface VideoItem {
 struct TikTokStyle {
   @State currentTab: string = '推荐'
   @State isPlaying: boolean = true
-  // @State likeCount: number = 12000
-  // @State commentCount: number = 2312
   @State isLiked: boolean = false // 是否已点赞
   @State showFloatingWindow: boolean = true
   @State currentBottomTab: number = 2
@@ -53,18 +51,12 @@ struct TikTokStyle {
     }
   ]
 
-  // 视频控制器
-  private videoController: VideoController = new VideoController()
 
   // 处理视频切换
   private switchVideo(direction: number) {
     const newIndex = this.currentVideoIndex + direction
     if (newIndex >= 0 && newIndex < this.videoList.length) {
       this.currentVideoIndex = newIndex
-      // this.videoController.stop()
-      // setTimeout(() => {
-      //   this.videoController.start()
-      // }, 100)
       this.videoSrc = this.videoList[this.currentVideoIndex].url
     }
   }
@@ -73,8 +65,8 @@ struct TikTokStyle {
     Stack() {
       // 视频容器
       Video({
-        // src: this.videoList[this.currentVideoIndex].url,
-        src: this.videoSrc,
+        src: this.videoList[this.currentVideoIndex].url,
+        // src: this.videoSrc,
         currentProgressRate: 1.0,
         controller: new VideoController()
       })
