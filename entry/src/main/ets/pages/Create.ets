@@ -74,7 +74,8 @@ struct CreatePage {
       Stack() {
         Column()
           .width('100%')
-          .aspectRatio(9/16)
+          // .aspectRatio(9/16)
+          .height(100)
           .backgroundColor('#1a1a1a')
 
         Column() {
@@ -89,7 +90,7 @@ struct CreatePage {
         .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
       }
-      .margin({ top: 15, bottom: 15 })
+      .margin({ top: 5, bottom: 5 })
 
       // 编辑工具
       Row() {
@@ -116,7 +117,7 @@ struct CreatePage {
         })
       }
       .justifyContent(FlexAlign.SpaceAround)
-      .padding(20)
+      .padding(10)
       .border({ width: { bottom: 1.5 }, color: 'rgba(255, 255, 255, 0.1)' })
 
       // 音乐部分

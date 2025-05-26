@@ -28,7 +28,8 @@ struct TikTokStyle {
   @State currentVideoIndex: number = 0; // 当前播放的视频索引
   @State private startY: number = 0
   @State private currentY: number = 0
-  @State private videoSrc: Resource = $r('app.media.dancing')
+  @State charCount: number = 0
+  @State description: string = ''
   // 添加视频列表数据
   private videoList: VideoItem[] = [
     {
@@ -57,7 +58,6 @@ struct TikTokStyle {
     const newIndex = this.currentVideoIndex + direction
     if (newIndex >= 0 && newIndex < this.videoList.length) {
       this.currentVideoIndex = newIndex
-      this.videoSrc = this.videoList[this.currentVideoIndex].url
     }
   }
 
@@ -66,7 +66,6 @@ struct TikTokStyle {
       // 视频容器
       Video({
         src: this.videoList[this.currentVideoIndex].url,
-        // src: this.videoSrc,
         currentProgressRate: 1.0,
         controller: new VideoController()
       })
@@ -152,7 +151,7 @@ struct TikTokStyle {
             .borderRadius(20)
           Text(`${this.videoList[this.currentVideoIndex].comments}`)
             .fontSize(12)
-            .fontColor(Color.White);
+            .fontColor(Color.White)
         }
         .margin({ bottom: 20 })
 
