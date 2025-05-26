@@ -1,4 +1,4 @@
-import router from '@ohos.router';
+import { router } from '@kit.ArkUI';
 import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit'; // 导入 hilog 用于调试
 
@@ -133,8 +133,9 @@ struct Index {
                   .fontColor(Color.White)
                   .margin({ top: 8 })
                   .onClick(() => {
-                    // 修改点：跳转到 AudioPlayer 页面
-                    router.pushUrl({ url: 'pages/AudioPlayer' });
+                    router.pushUrl({
+                      url: 'pages/AudioPlayer'
+                    })
                   });
               }
               .width('100%')
