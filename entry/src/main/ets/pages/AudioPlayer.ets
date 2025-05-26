@@ -1,6 +1,6 @@
-
+import router from '@ohos.router';
 import { hilog } from '@kit.PerformanceAnalysisKit';// 导入必要的模块
-import { router } from '@kit.ArkUI';
+
 const DOMAIN_AUDIO_PLAYER_PAGE = 0x0003;
 
 @Entry
@@ -122,8 +122,8 @@ struct AudioPlayer {
           .height(24)
           .margin({ left: 16 })
           .onClick(() => {
-            router.back()
-          })
+            router.pushUrl({ url: 'pages/Index' });
+          });
 
         Text('音乐播放')
           .fontSize(20)
@@ -244,7 +244,6 @@ struct AudioPlayer {
         }
         .margin({ top: 40 }); // 调整与进度条的间距
       }
-      .margin({top:40})
       .width('100%')
       .height('100%')
       .justifyContent(FlexAlign.Center) // 主内容区垂直居中
@@ -350,8 +349,8 @@ struct AudioPlayer {
       }
       .alignSelf(ItemAlign.End) // 自身对齐到父容器的末尾 (右侧)
       .justifyContent(FlexAlign.Center) // 内部元素垂直居中
-      .height('50%') // 占据父容器的全部高度
-      .margin({ left: 15,top: 150 }); // 距离右侧的边距
+      .height('100%') // 占据父容器的全部高度
+      .margin({ left: 15 }); // 距离右侧的边距
       //.position({ x: '100%', y: '50%' }) // 定位在右侧垂直居中
       //.offset({ x: -80, y: -150 }); // 调整偏移量，使其更靠右，并向上一些
     }

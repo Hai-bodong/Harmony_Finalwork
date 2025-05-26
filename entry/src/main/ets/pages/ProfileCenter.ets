@@ -9,21 +9,16 @@ struct ProfileCenter {
   build() {
     Stack({ alignContent: Alignment.TopStart }) {
       // 返回按钮
-
+      Image($r('app.media.icon_back'))
+        .width(24)
+        .height(24)
+        .margin({ top: 18, left: 18 })
+        .onClick(() => {
+          router.back()
+        })
 
       // 头部信息
       Column() {
-        Row(){
-          Image($r('app.media.icon_back'))
-            .width(24)
-            .height(24)
-            .margin({top:0,left:0})
-            .onClick(() => {
-              router.back()
-            })
-        }.height(24)
-        .width('100%')
-
         // 头像
         Image($r('app.media.profile2'))
           .width(100)

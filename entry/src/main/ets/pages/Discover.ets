@@ -1,3 +1,6 @@
+
+
+
 interface SongItemType {
   image: Resource // 图像路径
   name: string // 名称
