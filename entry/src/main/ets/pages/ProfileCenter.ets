@@ -10,9 +10,9 @@ struct ProfileCenter {
     Stack({ alignContent: Alignment.TopStart }) {
       // 返回按钮
       Image($r('app.media.icon_back'))
-        .width(30)
-        .height(30)
-        .margin({ top: 20, left: 20 })
+        .width(24)
+        .height(24)
+        .margin({ top: 18, left: 18 })
         .onClick(() => {
           router.back()
         })
@@ -24,7 +24,7 @@ struct ProfileCenter {
           .width(100)
           .height(100)
           .borderRadius(50)
-          .border({ width: 2, color: 'rgba(255,255,255,0.2)' })
+          .border({ width: 2, color: '#808080' })
           .margin({ bottom: 15 })
 
         // 用户名
@@ -41,6 +41,7 @@ struct ProfileCenter {
           .fontColor(Color.White)
           .margin({ bottom: 15 })
           .textAlign(TextAlign.Center)
+          .backgroundColor(Color.Gray)
 
         // 统计数据
         Row({ space: 20 }) {
@@ -82,7 +83,7 @@ struct ProfileCenter {
           .height(30)
           .fontSize(14)
           .backgroundColor('#FF0050')
-          .fontColor(Color.Black)
+          .fontColor(Color.White)
           .margin({ bottom: 20 })
 
         // 内容标签页
@@ -205,7 +206,7 @@ struct ProfileCenter {
       .height('50%')
       .margin({ top: '40%' })
 
-      // 底部导航栏
+      // 自定义底部导航栏
       Row() {
         // 首页
         Column() {
@@ -351,7 +352,7 @@ struct ProfileCenter {
       .position({ x: '85%', y: '85%' })
     }
     .aspectRatio(1)
-    .backgroundColor('#333')
+    .backgroundColor('#FFFF')
   }
 
   @Builder TabBuilder(title: string, index: number, icon: Resource) {
