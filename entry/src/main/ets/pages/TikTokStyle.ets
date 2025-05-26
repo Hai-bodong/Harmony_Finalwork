@@ -34,8 +34,8 @@ struct TikTokStyle {
     {
       id: 1,
       url: $r('app.media.dancing'),
-      author: '舞蹈达人',
-      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      author: '原神',
+      description: '原神启动 #原神 #二次元',
       likes: 12000,
       comments: 2312,
       avatar: $r('app.media.profile1')
@@ -43,8 +43,8 @@ struct TikTokStyle {
     {
       id: 2,
       url: $r('app.media.video1'),
-      author: '舞蹈达人',
-      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      author: '世界美景',
+      description: '一起感受自然的魅力 #风景 #自然 ',
       likes: 15000,
       comments: 3000,
       avatar: $r('app.media.profile1')
@@ -215,30 +215,10 @@ struct TikTokStyle {
         Text(this.videoList[this.currentVideoIndex].description)
           .fontSize(14)
           .margin({ top: 10 })
-        Row() {
-          Text('♫')
-            .fontSize(16)
-            .width(16)
-            .height(16)
-            .backgroundColor('rgba(255, 255, 255, 0.2)')
-            .borderRadius(8)
-            .textAlign(TextAlign.Center)
-          Text('街舞音乐合集 - DJ炸场')
-            .fontSize(14)
-            .margin({ left: 10 })
-        }
       }
       .width('70%')
       .position({ x: 16, y: '80%' })
 
-      // 动态字幕
-      Text('感受节奏 跟随音乐的韵律')
-        .fontSize(18)
-        .fontColor(Color.White)
-        .textShadow({ radius: 4, color: Color.Black, offsetX: 2, offsetY: 2 })
-        .position({ x: 0, y: '70%' })
-        .width('100%')
-        .textAlign(TextAlign.Center)
 
       // 底部导航栏
       Row() {
