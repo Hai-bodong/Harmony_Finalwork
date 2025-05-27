@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 // SongItemType 接口定义，增加 audioSrc
 interface SongItemType {
@@ -130,10 +131,29 @@ struct Discover {
 
   build() {
     Column() {
-      Text('发现你喜欢')
-        .fontColor('black')
-        .width('100%')
-        .margin({ bottom: 10 })
+      Row(){
+        Image($r('app.media.icon_back'))
+          .width(24)
+          .height(24)
+          .margin({left:16})
+          .onClick(()=>{
+            if (Number(router.getLength()) > 1) {
+              router.back();
+            }
+          });
+        Text('发现你喜欢')
+          .fontColor('#fff')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .layoutWeight(1) // 占据剩余空间
+          .textAlign(TextAlign.Center)
+          .margin({ right: 24 }); // 留出右侧返回按钮的占位空间
+      }
+      .width('100%')
+      .height(56)
+      .backgroundColor('#1E1E1E')
+      .alignItems(VerticalAlign.Center)
+
       List() {
         ForEach(this.songs, (item: SongItemType, index: number) => {
           ListItem() {

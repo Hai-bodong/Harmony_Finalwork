@@ -1,5 +1,6 @@
-import router from '@ohos.router';
+//import router from '@ohos.router';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { router } from '@kit.ArkUI'
 
 // 导入必要的模块
 const DOMAIN_AUDIO_PLAYER_PAGE = 0x0003;
@@ -154,12 +155,6 @@ struct AudioPlayer {
             // 播放完毕，可以自动播放下一首或停止
             hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Song finished, playing next.');
             this.playNext(); // 自动播放下一首
-            // 如果不想自动播放下一首，则：
-            // this.isPlaying = false;
-            // this.stopAlbumRotation();
-            // this.stopProgressBarUpdate();
-            // this.currentTime = 0;
-            // this.progress = 0;
           }
         }
       }, 1000);
@@ -325,6 +320,7 @@ struct AudioPlayer {
         }
         .margin({ top: 40 });
       }
+      .margin({top:40})
       .width('100%')
       .height('100%')
       .justifyContent(FlexAlign.Center)
@@ -418,8 +414,8 @@ struct AudioPlayer {
       }
       .alignSelf(ItemAlign.End)
       .justifyContent(FlexAlign.Center)
-      .height('100%')
-      .margin({ right: 15 });
+      .height('50%')
+      .margin({ right: 15,top: 150 });
     }
     .width('100%')
     .height('100%')
