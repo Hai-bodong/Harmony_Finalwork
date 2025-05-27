@@ -1,5 +1,4 @@
 import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 
 // SongItemType 接口定义，增加 audioSrc
 interface SongItemType {
@@ -57,76 +56,6 @@ struct Discover {
       id: '0005',
       audioSrc: $rawfile('song_1.mp3')
     }
-    // {
-    //   image: $r('app.media.song_cover9'),
-    //   name: '珍珠之歌',
-    //   author: '雷泽',
-    //   id: '0006',
-    //   audioSrc: $rawfile('song_6.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover10'),
-    //   name: '冰封交响曲',
-    //   author: '神里绫华',
-    //   id: '0007',
-    //   audioSrc: $rawfile('song_7.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover11'),
-    //   name: '同伴的力量',
-    //   author: '琴',
-    //   id: '0008',
-    //   audioSrc: $rawfile('song_8.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover12'),
-    //   name: '皎洁的笑颜',
-    //   author: '温迪',
-    //   id: '0009',
-    //   audioSrc: $rawfile('song_9.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover13'),
-    //   name: '璃月',
-    //   author: '行秋 ',
-    //   id: '0010',
-    //   audioSrc: $rawfile('song_10.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover14'),
-    //   name: '稻妻',
-    //   author: '珊瑚宫心海',
-    //   id: '0011',
-    //   audioSrc: $rawfile('song_11.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover15'),
-    //   name: '须弥',
-    //   author: '纳西妲',
-    //   id: '0012',
-    //   audioSrc: $rawfile('song_12.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover16'),
-    //   name: '枫丹',
-    //   author: '流浪者',
-    //   id: '0013',
-    //   audioSrc: $rawfile('song_13.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover17'),
-    //   name: '纳塔',
-    //   author: '娜维娅',
-    //   id: '0014',
-    //   audioSrc: $rawfile('song_14.mp3')
-    // },
-    // {
-    //   image: $r('app.media.song_cover18'),
-    //   name: '阿瑠的歌',
-    //   author: '枫原万叶',
-    //   id: '0015',
-    //   audioSrc: $rawfile('song_15.mp3')
-    // }
   ]
 
   build() {
