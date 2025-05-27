@@ -1,8 +1,5 @@
 import router from '@ohos.router';
 import { display } from '@kit.ArkUI';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-
-const DOMAIN_INDEX_PAGE = 0x0002;
 
 @Entry
 @Component
@@ -55,7 +52,6 @@ struct Index {
       // 如果栈中页面超过3个，则移除最早的页面
       if (this.pageStack.length > 5) {
         const removedPage = this.pageStack.shift();
-        hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', `Removed page from stack: ${removedPage}`);
       }
 
       // 跳转到新页面
