@@ -1,38 +1,36 @@
 import router from '@ohos.router';
 import { display } from '@kit.ArkUI';
-import { hilog } from '@kit.PerformanceAnalysisKit'; // 导入 hilog 用于调试
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
-const DOMAIN_INDEX_PAGE = 0x0002; // 为 Index.ets 定义一个单独的DOMAIN
+const DOMAIN_INDEX_PAGE = 0x0002;
 
 @Entry
 @Component
 struct Index {
-  @State showInitialPrompt: boolean = true; // 控制初始提示弹窗的显示
-  @State showMessagePopup: boolean = false; // 控制新消息弹窗的显示
+  @State showInitialPrompt: boolean = true;
+  @State showMessagePopup: boolean = false;
   @State cardWidth: number = 280;
   @State cardHeight: number = 400;
   @State currentTabIndex: number = 0;
-  @State currentBottomTab: number = 0;
+  @State pageStack: string[] = []; // 初始化页面栈
+
+  // 定义Tab页面对应的路由
+  private tabRoutes: string[] = [
+    'pages/Index',
+    'pages/Discover',
+    'pages/Create',
+    'pages/Message',
+    'pages/ProfileCenter'
+  ];
 
   aboutToAppear() {
-    hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', 'Index.ets aboutToAppear called');
     this.calculateCardSize();
+    this.showInitialPrompt = false;
+    this.showMessagePopup = true;
 
-    // 初始提示弹窗的隐藏逻辑
     setTimeout(() => {
-      this.showInitialPrompt = false;
-      hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', 'Initial prompt hidden.');
-
-      // 在初始提示隐藏后，显示新消息弹窗
-      this.showMessagePopup = true;
-      hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', 'Message popup shown.');
-
-      // 3秒后隐藏新消息弹窗
-      setTimeout(() => {
-        this.showMessagePopup = false;
-        hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', 'Message popup hidden after 3 seconds.');
-      }, 3000); // 3秒后隐藏
-    }, 1000); // 1秒后隐藏初始提示
+      this.showMessagePopup = false;
+    }, 3000);
   }
 
   calculateCardSize() {
@@ -45,195 +43,87 @@ struct Index {
     this.cardHeight = calculatedWidth * 1.43;
   }
 
+  // 页面跳转处理
+  navigateToPage(url: string) {
+    if (this.pageStack.length > 0 && this.pageStack[this.pageStack.length - 1] === url) {
+      // 如果目标页面已经在栈顶，则刷新当前页面
+      router.back();
+    } else {
+      // 添加新页面到栈中
+      this.pageStack.push(url);
+
+      // 如果栈中页面超过3个，则移除最早的页面
+      if (this.pageStack.length > 3) {
+        const removedPage = this.pageStack.shift();
+        hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', `Removed page from stack: ${removedPage}`);
+      }
+
+      // 跳转到新页面
+      router.pushUrl({ url: url }, router.RouterMode.Single);
+    }
+  }
+
+  // 页面回退处理
+  navigateBack() {
+    if (this.pageStack.length > 1) {
+      // 移除当前页面
+      this.pageStack.pop();
+
+      // 获取新的栈顶页面
+      const newTopPage = this.pageStack[this.pageStack.length - 1];
+
+      // 更新当前Tab索引
+      this.currentTabIndex = this.tabRoutes.indexOf(newTopPage);
+
+      // 跳转到新的栈顶页面
+      router.pushUrl({ url: newTopPage }, router.RouterMode.Single);
+    } else if (this.pageStack.length === 1) {
+      // 如果栈中只剩一个页面，则直接回退到该页面
+      router.replaceUrl({ url: 'pages/Index' }, router.RouterMode.Single);
+
+      // 更新当前Tab索引为首页
+      this.currentTabIndex = 0;
+    }
+  }
+
+  // Tab切换处理
+  onTabChange(index: number) {
+    if (this.currentTabIndex !== index) {
+      this.currentTabIndex = index;
+      this.navigateToPage(this.tabRoutes[index]);
+    }
+  }
+
   build() {
-    Stack({ alignContent: Alignment.Top }) {
-      // 背景改为黑色
-      Column() {
-        Blank();
+    Column() {
+      // 主内容区域 - 使用Tabs组件
+      Tabs({ barPosition: BarPosition.End }) {
+        // 首页Tab
+        TabContent() {
+          this.buildHomeContent();
+        }.tabBar(this.buildTabBarItem(0, $r('app.media.icon_home'), '首页'))
+
+        // 发现Tab
+        TabContent() {
+        }.tabBar(this.buildTabBarItem(1, $r('app.media.icon_find'), '发现'))
+
+        // 创建Tab
+        TabContent() {
+        }.tabBar(this.buildTabBarItem(2, $r('app.media.icon_add'), '创建'))
+
+        // 消息Tab
+        TabContent() {
+        }.tabBar(this.buildTabBarItem(3, $r('app.media.icon_message'), '消息'))
+
+        // 个人中心Tab
+        TabContent() {
+        }.tabBar(this.buildTabBarItem(4, $r('app.media.icon_profile'), '我'))
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor('#121212');
+      .barWidth('100%')
+      .barHeight(60)
+      .backgroundColor('#1E1E1E')
 
-      // Logo颜色改为白色
-      Text('HarmonyOS 音视频')
-        .fontSize(24)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(Color.White) // 改为白色
-        .margin({ top: 20 })
-        .align(Alignment.Top);
-
-      // 根据当前选中的底部标签显示对应的内容
-      if (this.currentBottomTab === 0) {
-        // 首页内容
-        Scroll() {
-          Row({ space: 20 }) {
-            // 视频播放卡片
-            Column() {
-              Image($r('app.media.background1'))
-                .width('100%')
-                .height('60%')
-                .objectFit(ImageFit.Cover)
-                .borderRadius(16);
-              Column() {
-                Text('视频播放')
-                  .fontSize(18)
-                  .fontWeight(FontWeight.Bold)
-                  .margin({ bottom: 8 })
-                  .fontColor(Color.White); // 文字改为白色
-                Text('畅享高清视频、精彩内容')
-                  .fontSize(12)
-                  .opacity(0.8)
-                  .margin({ bottom: 8 })
-                  .fontColor('#AAAAAA'); // 副标题改为浅灰色
-                Button('立即体验')
-                  .width(100)
-                  .height(30)
-                  .fontSize(12)
-                  .backgroundColor('#FF0050')
-                  .fontColor(Color.White)
-                  .margin({ top: 8 })
-                  .onClick(() => {
-                    router.pushUrl({ url: 'pages/TikTokStyle' });
-                  });
-              }
-              .width('100%')
-              .padding(10);
-            }
-            .width(this.cardWidth)
-            .height(this.cardHeight)
-            .backgroundColor('#1E1E1E') // 卡片背景改为深灰色
-            .borderRadius(16)
-            .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
-
-            // 音频播放卡片
-            Column() {
-              Column()
-                .width('100%')
-                .height('60%')
-                .backgroundImage($r('app.media.gradient_bg'))
-                .backgroundImageSize(ImageSize.Cover)
-                .borderRadius(16);
-              Column() {
-                Text('音频播放')
-                  .fontSize(18)
-                  .fontWeight(FontWeight.Bold)
-                  .margin({ bottom: 8 })
-                  .fontColor(Color.White);
-                Text('沉浸式音乐体验')
-                  .fontSize(12)
-                  .opacity(0.8)
-                  .margin({ bottom: 8 })
-                  .fontColor('#AAAAAA');
-                Button('立即体验')
-                  .width(100)
-                  .height(30)
-                  .fontSize(12)
-                  .backgroundColor('#FF0050')
-                  .fontColor(Color.White)
-                  .margin({ top: 8 })
-                  .onClick(() => {
-                    // 修改点：跳转到 AudioPlayer 页面
-                    router.pushUrl({ url: 'pages/AudioPlayer' });
-                  });
-              }
-              .width('100%')
-              .padding(10);
-            }
-            .width(this.cardWidth)
-            .height(this.cardHeight)
-            .backgroundColor('#1E1E1E')
-            .borderRadius(16)
-            .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
-
-            // 个人中心卡片
-            Column() {
-              Image($r('app.media.profile2'))
-                .width('100%')
-                .height('60%')
-                .objectFit(ImageFit.Cover)
-                .borderRadius(16);
-              Column() {
-                Text('个人中心')
-                  .fontSize(18)
-                  .fontWeight(FontWeight.Bold)
-                  .margin({ bottom: 8 })
-                  .fontColor(Color.White);
-                Text('管理音视频资源')
-                  .fontSize(12)
-                  .opacity(0.8)
-                  .margin({ bottom: 8 })
-                  .fontColor('#AAAAAA');
-                Button('立即体验')
-                  .width(100)
-                  .height(30)
-                  .fontSize(12)
-                  .backgroundColor('#FF0050')
-                  .fontColor(Color.White)
-                  .margin({ top: 8 })
-                  .onClick(() => {
-                    router.pushUrl({ url: 'pages/ProfileCenter' });
-                  });
-              }
-              .width('100%')
-              .padding(10);
-            }
-            .width(this.cardWidth)
-            .height(this.cardHeight)
-            .backgroundColor('#1E1E1E')
-            .borderRadius(16)
-            .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
-          }
-          .justifyContent(FlexAlign.Center)
-          .padding({ left: 20, right: 20 })
-          .margin({ top: 100 });
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .width('100%')
-        .height('100%');
-      } else if (this.currentBottomTab === 1) {
-        // 发现页面内容
-        Column() {
-          Text('发现页面内容')
-            .fontSize(20)
-            .margin({ top: 50 })
-            .fontColor(Color.White);
-        }
-        .width('100%')
-        .height('100%');
-      } else if (this.currentBottomTab === 2) {
-        // 创建页面内容
-        Column() {
-          Text('创建页面内容')
-            .fontSize(20)
-            .margin({ top: 50 })
-            .fontColor(Color.White);
-        }
-        .width('100%')
-        .height('100%');
-      } else if (this.currentBottomTab === 3) {
-        // 消息页面内容
-        Column() {
-          Text('消息页面内容')
-            .fontSize(20)
-            .margin({ top: 50 })
-            .fontColor(Color.White);
-        }
-        .width('100%')
-        .height('100%');
-      } else if (this.currentBottomTab === 4) {
-        // 个人中心页面内容
-        Column() {
-          Text('个人中心页面内容')
-            .fontSize(20)
-            .margin({ top: 50 })
-            .fontColor(Color.White);
-        }
-        .width('100%')
-        .height('100%');
-      }
-
-      // 初始浮动提示 (保留，但会在新消息弹窗后隐藏)
+      // 初始浮动提示
       if (this.showInitialPrompt) {
         Column() {
           Text('👆 点击卡片体验不同的功能')
@@ -243,157 +133,205 @@ struct Index {
         .width('auto')
         .height(40)
         .padding({ left: 24, right: 24 })
-        .backgroundColor('rgba(255,255,255,0.2)') // 提示框背景改为半透明白色
+        .backgroundColor('rgba(255,255,255,0.2)')
         .borderRadius(30)
         .position({ x: '50%', y: '80%' })
         .translate({ x: '-50%' })
         .onClick(() => {
           this.showInitialPrompt = false;
-          hilog.info(DOMAIN_INDEX_PAGE, 'IndexPage', 'Initial prompt clicked and hidden.');
         });
       }
 
       // 新消息弹窗
       if (this.showMessagePopup) {
         Row() {
-          // 头像 (请替换为你的头像资源)
-          Image($r('app.media.logo')) // 示例头像，请替换
+          Image($r('app.media.logo'))
             .width(40)
             .height(40)
-            .borderRadius(20) // 圆形头像
+            .borderRadius(20)
             .margin({ right: 10 });
 
-          // 消息内容
           Text('原神，启动！')
             .fontSize(16)
-            .fontColor(Color.Black); // 消息文本颜色
+            .fontColor(Color.Black);
         }
-        .width('90%') // 弹窗宽度
+        .width('90%')
         .padding(15)
-        .backgroundColor(Color.White) // 弹窗背景颜色
-        .borderRadius(10) // 圆角
-        .position({ x: '5%', y: 50 }) // 定位在页面顶部，留出一定边距
-        .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 }); // 添加阴影效果
+        .backgroundColor(Color.White)
+        .borderRadius(10)
+        .position({ x: '5%', y: 50 })
+        .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
       }
-
-      // 自定义底部导航栏
-      Row() {
-        // 首页
-        Column() {
-          Image($r('app.media.icon_home'))
-            .width(24)
-            .height(24)
-            .objectFit(ImageFit.Contain)
-            .margin({ bottom: 4 })
-            .colorFilter({
-              color: this.currentBottomTab === 0 ? '#FF0050' : '#FFFFFF'
-            });
-          Text('首页')
-            .fontSize(12)
-            .fontColor(this.currentBottomTab === 0 ? '#FF0050' : '#FFFFFF');
-        }
-        .width('20%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .onClick(() => {
-          this.currentBottomTab = 0;
-          // router.pushUrl({ url: 'pages/Index' }); // 在当前页不需要再次跳转
-        });
-        // 发现
-        Column() {
-          Image($r('app.media.icon_find'))
-            .width(24)
-            .height(24)
-            .objectFit(ImageFit.Contain)
-            .margin({ bottom: 4 })
-            .colorFilter({
-              color: this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF'
-            });
-          Text('发现')
-            .fontSize(12)
-            .fontColor(this.currentBottomTab === 1 ? '#FF0050' : '#FFFFFF');
-        }
-        .width('20%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .onClick(() => {
-          this.currentBottomTab = 1;
-          router.pushUrl({ url: 'pages/Discover' });
-        });
-        // 创建
-        Column() {
-          Image($r('app.media.icon_add'))
-            .width(24)
-            .height(24)
-            .objectFit(ImageFit.Contain)
-            .margin({ bottom: 4 })
-            .colorFilter({
-              color: this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF'
-            });
-          Text('创建')
-            .fontSize(12)
-            .fontColor(this.currentBottomTab === 2 ? '#FF0050' : '#FFFFFF');
-        }
-        .width('20%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .onClick(() => {
-          this.currentBottomTab = 2;
-          router.pushUrl({ url: 'pages/Create' });
-        });
-        // 消息
-        Column() {
-          Image($r('app.media.icon_message'))
-            .width(24)
-            .height(24)
-            .objectFit(ImageFit.Contain)
-            .margin({ bottom: 4 })
-            .colorFilter({
-              color: this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF'
-            });
-          Text('消息')
-            .fontSize(12)
-            .fontColor(this.currentBottomTab === 3 ? '#FF0050' : '#FFFFFF');
-        }
-        .width('20%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .onClick(() => {
-          this.currentBottomTab = 3;
-          router.pushUrl({ url: 'pages/Message' });
-        });
-        // 我
-        Column() {
-          Image($r('app.media.icon_profile'))
-            .width(24)
-            .height(24)
-            .objectFit(ImageFit.Contain)
-            .margin({ bottom: 4 })
-            .colorFilter({
-              color: this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF'
-            });
-          Text('我')
-            .fontSize(12)
-            .fontColor(this.currentBottomTab === 4 ? '#FF0050' : '#FFFFFF');
-        }
-        .width('20%')
-        .height('100%')
-        .justifyContent(FlexAlign.Center)
-        .onClick(() => {
-          this.currentBottomTab = 4;
-          router.pushUrl({ url: 'pages/ProfileCenter' });
-        });
-      }
-      .width('100%')
-      .height(60)
-      .backgroundColor('#1E1E1E')
-      .position({ x: 0, y: '100%' })
-      .translate({ y: -60 });
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#121212')
     .onAreaChange(() => {
       this.calculateCardSize();
+    });
+  }
+
+  // 构建首页内容
+  @Builder
+  buildHomeContent() {
+    Column() {
+      // 顶部标题
+      Text('HarmonyOS 音视频')
+        .fontSize(24)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Color.White)
+        .margin({ top: 20 });
+
+      // 主内容区域
+      Scroll() {
+        Row({ space: 10 }) {
+          // 视频播放卡片
+          Column() {
+            Image($r('app.media.background1'))
+              .width('100%')
+              .height('60%')
+              .objectFit(ImageFit.Cover)
+              .borderRadius(16);
+            Column() {
+              Text('视频播放')
+                .fontSize(20)
+                .fontWeight(FontWeight.Bold)
+                .margin({ bottom: 8 })
+                .fontColor(Color.White);
+              Text('畅享高清视频、精彩内容')
+                .fontSize(13)
+                .opacity(0.8)
+                .margin({ bottom: 8 })
+                .fontColor('#AAAAAA');
+              Button('立即体验')
+                .width(100)
+                .height(40)
+                .fontSize(14)
+                .backgroundColor('#FF0050')
+                .fontColor(Color.White)
+                .margin({ top: 8 })
+                .onClick(() => {
+                  this.navigateToPage('pages/TikTokStyle');
+                });
+            }
+            .width('100%')
+            .padding(10);
+          }
+          .width(this.cardWidth)
+          .height(this.cardHeight)
+          .backgroundColor('#1E1E1E')
+          .borderRadius(16)
+          .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
+
+          // 音频播放卡片
+          Column() {
+            Column()
+              .width('100%')
+              .height('60%')
+              .backgroundImage($r('app.media.gradient_bg'))
+              .backgroundImageSize(ImageSize.Cover)
+              .borderRadius(16);
+            Column() {
+              Text('音频播放')
+                .fontSize(20)
+                .fontWeight(FontWeight.Bold)
+                .margin({ bottom: 8 })
+                .fontColor(Color.White);
+              Text('沉浸式音乐体验')
+                .fontSize(14)
+                .opacity(0.8)
+                .margin({ bottom: 8 })
+                .fontColor('#AAAAAA');
+              Button('立即体验')
+                .width(100)
+                .height(30)
+                .fontSize(14)
+                .backgroundColor('#FF0050')
+                .fontColor(Color.White)
+                .margin({ top: 8 })
+                .onClick(() => {
+                  this.navigateToPage('pages/AudioPlayer');
+                });
+            }
+            .width('100%')
+            .padding(10);
+          }
+          .width(this.cardWidth)
+          .height(this.cardHeight)
+          .backgroundColor('#1E1E1E')
+          .borderRadius(16)
+          .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
+
+          // 个人中心卡片
+          Column() {
+            Image($r('app.media.profile2'))
+              .width('100%')
+              .height('60%')
+              .objectFit(ImageFit.Cover)
+              .borderRadius(16);
+            Column() {
+              Text('个人中心')
+                .fontSize(20)
+                .fontWeight(FontWeight.Bold)
+                .margin({ bottom: 8 })
+                .fontColor(Color.White);
+              Text('管理音视频资源')
+                .fontSize(14)
+                .opacity(0.8)
+                .margin({ bottom: 8 })
+                .fontColor('#AAAAAA');
+              Button('立即体验')
+                .width(100)
+                .height(30)
+                .fontSize(14)
+                .backgroundColor('#FF0050')
+                .fontColor(Color.White)
+                .margin({ top: 8 })
+                .onClick(() => {
+                  this.navigateToPage('pages/ProfileCenter');
+                });
+            }
+            .width('100%')
+            .padding(10);
+          }
+          .width(this.cardWidth)
+          .height(this.cardHeight)
+          .backgroundColor('#1E1E1E')
+          .borderRadius(16)
+          .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 });
+        }
+        .justifyContent(FlexAlign.Center)
+        .padding({ left: 20, right: 20 })
+      }
+      .scrollable(ScrollDirection.Horizontal)
+      .width('100%')
+      .height('100%');
+    }
+    .width('100%')
+    .height('100%');
+  }
+
+  // 构建TabBar项
+  @Builder
+  buildTabBarItem(index: number, icon: Resource, text: string) {
+    Column() {
+      Image(icon)
+        .width(24)
+        .height(24)
+        .objectFit(ImageFit.Contain)
+        .margin({ bottom: 4 })
+        .colorFilter({
+          color: this.currentTabIndex === index ? '#FF0050' : '#FFFFFF'
+        });
+      Text(text)
+        .fontSize(12)
+        .fontColor(this.currentTabIndex === index ? '#FF0050' : '#FFFFFF');
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+    .onClick(() => {
+      this.onTabChange(index);
     });
   }
 }

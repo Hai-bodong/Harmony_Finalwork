@@ -15,9 +15,8 @@ struct CreatePage {
       Row() {
         // 返回按钮
         Image($r('app.media.icon_back'))
-          .width(30)
-          .height(30)
-          .margin({ top: 10 })
+          .width(24)
+          .height(24)
           .onClick(() => {
             router.back()
           })
@@ -40,7 +39,7 @@ struct CreatePage {
           .width(60)
           .textAlign(TextAlign.Center)
       }
-      .padding(20)
+      .padding(10)
       .border({ width: { bottom: 1.5 }, color: 'rgba(255, 255, 255, 0.1)' })
 
       // 创建标签页
@@ -48,7 +47,7 @@ struct CreatePage {
         ForEach(['video', 'photo', 'music', 'text'], (item: string) => {
           Column({ space: 4 }) {
             Text(this.getTabLabel(item))
-              .fontSize(18)
+              .fontSize(16)
               .fontWeight(this.currentTab === item ? FontWeight.Bold : FontWeight.Normal)
               .opacity(this.currentTab === item ? 1 : 0.7)
               .fontColor(Color.White)
@@ -72,11 +71,6 @@ struct CreatePage {
 
       // 预览区域
       Stack() {
-        Column()
-          .width('100%')
-          .aspectRatio(9/16)
-          .backgroundColor('#1a1a1a')
-
         Column() {
           Text(this.getPreviewIcon())
             .fontSize(40)

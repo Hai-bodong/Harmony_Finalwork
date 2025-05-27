@@ -1,19 +1,9 @@
-import router from '@ohos.router';
-import hilog from '@ohos.hilog';
-import {Videoaction,Videoitem}from '../Support/VideoSupport'
+import router from '@ohos.router'
+import hilog from '@ohos.hilog'
+import { VideoItem } from '../Support/videoitem'
 
-const DOMAIN_TIKTOK_STYLE: number = 0x0001;
+const DOMAIN_TIKTOK_STYLE: number = 0x0001
 
-// 定义视频数据类型
-interface VideoItem {
-  id: number;
-  url: Resource;
-  author: string;
-  description: string;
-  likes: number;
-  comments: number;
-  avatar: Resource;
-}
 
 @Entry
 @Component
@@ -66,7 +56,6 @@ struct TikTokStyle {
       // 视频容器
       Video({
         src: this.videoList[this.currentVideoIndex].url,
-        // src: this.videoSrc,
         currentProgressRate: 1.0,
         controller: new VideoController()
       })

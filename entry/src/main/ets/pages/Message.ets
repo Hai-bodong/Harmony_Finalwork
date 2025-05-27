@@ -58,7 +58,7 @@ struct Messages {
             .textAlign(TextAlign.Center)
         }
         .width('100%')
-        .padding(20)
+        .padding(10)
 
         // 标签页
         Row() {
