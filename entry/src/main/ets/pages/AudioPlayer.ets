@@ -97,10 +97,6 @@ struct AudioPlayer {
     // 重置播放状态
     this.currentTime = 0;
     this.progress = 0;
-    // 如果之前是播放状态，切换歌曲后可以考虑继续播放，或者让用户手动点击播放
-    // if (this.isPlaying) {
-    //   // 可能需要重新初始化音频播放器实例并播放
-    // }
     hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Loaded song: ${song.name} at index ${index}`);
   }
 
@@ -247,7 +243,6 @@ struct AudioPlayer {
         }
         .margin({ top: 30 });
 
-        // 音律跳动效果 (当前为静态图，可替换为 ImageAnimator 或 Lottie)
         Image(this.isPlaying ? $r('app.media.icon_pause2') : $r('app.media.ic_wave3')) // 根据播放状态显示不同音律图或占位
           .width('80%')
           .height(60)
@@ -301,7 +296,6 @@ struct AudioPlayer {
                 this.startProgressBarUpdate();
                 hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback started.');
               } else {
-                // this.isAlbumRotating = false; // 暂停时不一定停止旋转，看产品设计
                 this.stopAlbumRotation(); // 或者只是暂停旋转的逻辑 this.isAlbumRotating = false;
                 this.stopProgressBarUpdate(); // 进度条必须停
                 hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback paused.');
