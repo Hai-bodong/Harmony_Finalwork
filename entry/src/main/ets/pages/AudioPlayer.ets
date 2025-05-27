@@ -1,17 +1,33 @@
-import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';// 导入必要的模块
+//import router from '@ohos.router';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { router } from '@kit.ArkUI'
 
+// 导入必要的模块
 const DOMAIN_AUDIO_PLAYER_PAGE = 0x0003;
+
+// SongItemType 接口定义，与 Discover.ets 中保持一致
+interface SongItemType {
+  image: Resource
+  name: string
+  author: string
+  id: string // 假设歌曲有唯一ID，虽然当前切换逻辑主要依赖索引
+}
+
+interface GeneratedTypeLiteralInterface_1 {
+  songs: SongItemType[];
+  currentIndex: number;
+}
 
 @Entry
 @Component
 struct AudioPlayer {
-  //图标激活状态
+  // 图标激活状态
   @State isCollectActive: boolean = false;
   @State isShareActive: boolean = false;
   @State showLikePlusOne: boolean = false;
   @State plusOneOpacity: number = 0;
   @State plusOneOffsetY: number = 0;
+
   // 专辑封面旋转角度
   @State albumRotation: number = 0;
   // 控制专辑封面旋转动画的开关
@@ -24,17 +40,40 @@ struct AudioPlayer {
   @State progress: number = 0;
   // 当前播放时间 (秒)
   @State currentTime: number = 0;
-  // 总时长 (秒)
+  // 总时长 (秒) - 注意：这个应该是动态获取当前歌曲的，暂时保持静态
   @State totalTime: number = 225; // 示例：3分45秒
 
-  // 定时器ID，用于控制专辑封面旋转和进度条
+  // 歌曲列表和当前播放索引
+  @State songs: SongItemType[] = [];
+  @State currentIndex: number = -1;
+
+  // 当前播放的歌曲信息，由 songs 和 currentIndex 派生
+  @State currentSongImage: Resource = $r('app.media.album_cover'); // 默认专辑封面
+  @State currentSongName: string = '歌曲名'; // 默认歌曲名
+  @State currentSongAuthor: string = '歌手'; // 默认歌手
+
+  // 定时器ID
   private albumRotateTimerId: number = -1;
   private progressTimerId: number = -1;
 
   aboutToAppear() {
     hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'AudioPlayer.ets aboutToAppear called');
-    this.startAlbumRotation();
-    this.startProgressBarUpdate();
+
+    // 获取路由参数
+    const params = router.getParams() as GeneratedTypeLiteralInterface_1;
+    if (params && params.songs && params.songs.length > 0 && params.currentIndex !== undefined) {
+      hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Received params: songs count ${params.songs.length}, index ${params.currentIndex}`);
+      this.songs = params.songs;
+      this.currentIndex = params.currentIndex;
+      this.loadSong(this.currentIndex); // 加载初始歌曲
+    } else {
+      hilog.warn(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'No valid params received or song list empty');
+      // 可以选择返回或显示错误信息
+      // router.back();
+    }
+
+    this.startAlbumRotation(); // 动画和进度条更新应在歌曲加载后，或根据播放状态决定
+    // this.startProgressBarUpdate(); // 移到播放时启动
   }
 
   aboutToDisappear() {
@@ -43,14 +82,52 @@ struct AudioPlayer {
     this.stopProgressBarUpdate();
   }
 
+  // 加载指定索引的歌曲信息并更新UI
+  loadSong(index: number) {
+    if (this.songs.length === 0 || index < 0 || index >= this.songs.length) {
+      hilog.error(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Invalid index ${index} or empty song list.`);
+      return;
+    }
+    const song = this.songs[index];
+    this.currentSongImage = song.image;
+    this.currentSongName = song.name;
+    this.currentSongAuthor = song.author;
+    this.currentIndex = index; // 确保currentIndex也更新
+
+    // 重置播放状态
+    this.currentTime = 0;
+    this.progress = 0;
+    hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Loaded song: ${song.name} at index ${index}`);
+  }
+
+  // 播放下一首
+  playNext() {
+    if (this.songs.length === 0) return;
+    let nextIndex = this.currentIndex + 1;
+    if (nextIndex >= this.songs.length) {
+      nextIndex = 0; // 循环到第一首
+    }
+    this.loadSong(nextIndex);
+  }
+
+  // 播放上一首
+  playPrevious() {
+    if (this.songs.length === 0) return;
+    let prevIndex = this.currentIndex - 1;
+    if (prevIndex < 0) {
+      prevIndex = this.songs.length - 1; // 循环到最后一首
+    }
+    this.loadSong(prevIndex);
+  }
+
+
   // 启动专辑封面旋转动画
   startAlbumRotation() {
+    if (!this.isAlbumRotating) return; // 如果全局开关是关闭的，则不启动
     if (this.albumRotateTimerId === -1) {
       this.albumRotateTimerId = setInterval(() => {
-        if (this.isAlbumRotating) {
-          this.albumRotation = (this.albumRotation + 1) % 360; // 每次增加1度
-        }
-      }, 50); // 每50毫秒更新一次，实现平滑旋转
+        this.albumRotation = (this.albumRotation + 1) % 360;
+      }, 50);
     }
   }
 
@@ -66,17 +143,17 @@ struct AudioPlayer {
   startProgressBarUpdate() {
     if (this.progressTimerId === -1) {
       this.progressTimerId = setInterval(() => {
-        if (this.isPlaying) {
+        if (this.isPlaying) { // 仅在播放时更新进度
           this.currentTime += 1;
+          // 注意: totalTime 应该是当前歌曲的总时长，这里暂时用固定的
           this.progress = (this.currentTime / this.totalTime) * 100;
           if (this.currentTime >= this.totalTime) {
-            this.currentTime = 0;
-            this.progress = 0;
-            this.isPlaying = false; // 播放结束，暂停
-            this.stopAlbumRotation(); // 停止旋转
+            // 播放完毕，可以自动播放下一首或停止
+            hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Song finished, playing next.');
+            this.playNext(); // 自动播放下一首
           }
         }
-      }, 1000); // 每秒更新一次
+      }, 1000);
     }
   }
 
@@ -96,7 +173,7 @@ struct AudioPlayer {
   }
 
   build() {
-    Stack({ alignContent: Alignment.TopStart }) { // 调整Stack的对齐方式，方便后续定位
+    Stack({ alignContent: Alignment.TopStart }) {
       // 背景渐变动画
       Column() {
         Blank();
@@ -106,13 +183,13 @@ struct AudioPlayer {
       .linearGradient({
         angle: 45,
         direction: GradientDirection.Left,
-        colors: [[0x8A2387, 0.0], [0xE94057, 0.5], [0xF27121, 1.0]] // 渐变颜色
+        colors: [[0x8A2387, 0.0], [0xE94057, 0.5], [0xF27121, 1.0]]
       })
       .animation({
-        duration: 5000, // 15秒动画周期
-        iterations: -1, // 无限循环
+        duration: 5000,
+        iterations: -1,
         curve: Curve.Linear,
-        playMode: PlayMode.Alternate // 交替播放
+        playMode: PlayMode.Alternate
       });
 
       // 顶部导航栏
@@ -122,98 +199,91 @@ struct AudioPlayer {
           .height(24)
           .margin({ left: 16 })
           .onClick(() => {
-            router.pushUrl({ url: 'pages/Index' });
+            hilog.debug(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Back button clicked.');
+            router.back(); // 使用 router.back() 返回上一页
           });
-
         Text('音乐播放')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
           .fontColor(Color.White)
           .layoutWeight(1)
           .textAlign(TextAlign.Center);
-
-        Blank().width(24).margin({ right: 16 }); // 占位符
+        Blank().width(24).margin({ right: 16 });
       }
       .width('100%')
       .height(56)
       .position({ x: 0, y: 0 })
-      .backgroundColor(Color.Transparent); // 透明背景
+      .backgroundColor(Color.Transparent);
 
-      // 主内容区 (专辑封面、歌曲信息、音律、播放控制、进度条)
+      // 主内容区
       Column() {
         // 专辑封面
-        Image($r('app.media.album_cover')) // 专辑封面图片
+        Image(this.currentSongImage)
           .width(200)
           .height(200)
           .borderRadius(10)
           .shadow({ radius: 8, color: '#000000', offsetX: 0, offsetY: 4 })
-          .rotate({ angle: this.albumRotation }) // 应用旋转角度
-          .margin({ top: 50 }); // 调整顶部边距，使其向下移动
+          .rotate({ angle: this.albumRotation })
+          .margin({ top: 50 });
 
         // 歌曲信息
         Column() {
-          Text('让风告诉你') // 歌曲名
+          Text(this.currentSongName)
             .fontSize(22)
             .fontWeight(FontWeight.Bold)
             .fontColor(Color.White)
             .margin({ bottom: 5 });
-
-          Text('演唱：可莉/温迪/七七/魈') // 歌手
+          Text(this.currentSongAuthor)
             .fontSize(16)
             .fontColor('rgba(255, 255, 255, 0.8)');
-
           Text('当你的天空突然下起了大雨...')
             .margin({top:5})
             .fontColor(Color.Orange)
             .fontSize(15)
-            //.fontColor('rgba(255, 255, 255, 0.8)');
         }
-        .margin({ top: 30 }); // 调整与专辑封面的间距
+        .margin({ top: 30 });
 
-        // 音律跳动效果 (使用静态图片或 ImageAnimator)
-        Image($r('app.media.icon_pause2')) // 静态音律图片
+        Image(this.isPlaying ? $r('app.media.icon_pause2') : $r('app.media.ic_wave3')) // 根据播放状态显示不同音律图或占位
           .width('80%')
           .height(60)
           .objectFit(ImageFit.Contain)
-          .margin({ top: 30 }); // 调整与歌曲信息的间距
+          .margin({ top: 30 });
 
         // 进度条
         Column() {
           Progress({ value: this.progress, total: 100, type: ProgressType.Linear })
             .width('80%')
             .height(3)
-            .color(Color.White) // 进度条颜色
-            .backgroundColor('rgba(255, 255, 255, 0.3)'); // 背景颜色
-
+            .color(Color.White)
+            .backgroundColor('rgba(255, 255, 255, 0.3)');
           Row() {
             Text(this.formatTime(this.currentTime))
               .fontSize(12)
               .fontColor('rgba(255, 255, 255, 0.8)');
             Blank().layoutWeight(1);
-            Text(this.formatTime(this.totalTime))
+            Text(this.formatTime(this.totalTime)) // 注意：totalTime应为当前歌曲的
               .fontSize(12)
               .fontColor('rgba(255, 255, 255, 0.8)');
           }
           .width('80%')
           .margin({ top: 5 });
         }
-        .margin({ top: 20 }); // 调整与音律效果的间距
+        .margin({ top: 20 });
 
         // 音乐控制按钮
         Row({ space: 20 }) {
           // 上一首
-          Image($r('app.media.ic_prev')) // 上一首图标
+          Image($r('app.media.ic_prev'))
             .width(50)
             .height(50)
             .borderRadius(25)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
               hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Previous song clicked');
-              // TODO: 上一首功能
+              this.playPrevious();
             });
-
           // 播放/暂停
-          Image(this.isPlaying ? $r('app.media.ic_paused') : $r('app.media.ic_play')) // 播放/暂停图标
+          Image(this.isPlaying ? $r('app.media.ic_paused') : $r('app.media.ic_play'))
             .width(60)
             .height(60)
             .borderRadius(30)
@@ -221,40 +291,42 @@ struct AudioPlayer {
             .onClick(() => {
               this.isPlaying = !this.isPlaying;
               if (this.isPlaying) {
-                this.startAlbumRotation(); // 开始旋转
-                this.startProgressBarUpdate(); // 开始更新进度条
+                this.isAlbumRotating = true; // 确保动画开关是开的
+                this.startAlbumRotation();
+                this.startProgressBarUpdate();
+                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback started.');
               } else {
-                this.stopAlbumRotation(); // 停止旋转
-                this.stopProgressBarUpdate(); // 停止更新进度条
+                this.stopAlbumRotation(); // 或者只是暂停旋转的逻辑 this.isAlbumRotating = false;
+                this.stopProgressBarUpdate(); // 进度条必须停
+                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback paused.');
               }
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Play/Pause clicked, isPlaying: ${this.isPlaying}`);
-              // TODO: 播放/暂停功能
             });
-
           // 下一首
-          Image($r('app.media.ic_next')) // 下一首图标
+          Image($r('app.media.ic_next'))
             .width(50)
             .height(50)
             .borderRadius(25)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
               hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Next song clicked');
-              // TODO: 下一首功能
+              this.playNext();
             });
         }
-        .margin({ top: 40 }); // 调整与进度条的间距
+        .margin({ top: 40 });
       }
+      .margin({top:40})
       .width('100%')
       .height('100%')
-      .justifyContent(FlexAlign.Center) // 主内容区垂直居中
-      .alignItems(HorizontalAlign.Center); // 主内容区水平居中
+      .justifyContent(FlexAlign.Center)
+      .alignItems(HorizontalAlign.Center);
 
-      // 右侧纵向图标
-      Column({ space: 25 }) { // 增加间距
+      // 右侧纵向图标 (省略部分未改动的代码)
+      Column({ space: 25 }) {
+
         // 爱心图标
         Column({ space: 5 }) {
-          Stack({ alignContent: Alignment.Center }) { // 使用Stack包裹爱心图标和+1提示
-            Image(this.isLiked ? $r('app.media.icon_liked') : $r('app.media.icon_like')) // 爱心图标
+          Stack({ alignContent: Alignment.Center }) {
+            Image(this.isLiked ? $r('app.media.icon_liked') : $r('app.media.icon_like'))
               .width(40)
               .height(40)
               .borderRadius(20)
@@ -262,26 +334,19 @@ struct AudioPlayer {
               .onClick(() => {
                 this.isLiked = !this.isLiked;
                 hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Like clicked, isLiked: ${this.isLiked}`);
-
-                // "+1" 提示动效
-                this.showLikePlusOne = true;
-                this.plusOneOpacity = 1; // 初始完全不透明
-                this.plusOneOffsetY = 0; // 初始位置
-
-                animateTo({ curve: Curve.EaseOut, duration: 500 }, () => {
-                  this.plusOneOffsetY = -50; // 向上移动50px
-                  this.plusOneOpacity = 0;   // 渐隐
-                });
-
-                // 动画结束后重置状态，以便下次点击时再次显示
-                setTimeout(() => {
-                  this.showLikePlusOne = false;
-                  this.plusOneOpacity = 0; // 确保完全隐藏
-                  this.plusOneOffsetY = 0; // 重置位置
-                }, 5000); // 匹配动画持续时间
+                if (this.isLiked) { // 只有点赞时才显示+1
+                  this.showLikePlusOne = true;
+                  this.plusOneOpacity = 1;
+                  this.plusOneOffsetY = 0;
+                  animateTo({ curve: Curve.EaseOut, duration: 500 }, () => {
+                    this.plusOneOffsetY = -50;
+                    this.plusOneOpacity = 0;
+                  });
+                  setTimeout(() => {
+                    this.showLikePlusOne = false;
+                  }, 500); // 动画结束后隐藏
+                }
               });
-
-            // "+1" 提示文本
             if (this.showLikePlusOne) {
               Text('+1')
                 .fontSize(25)
@@ -289,74 +354,66 @@ struct AudioPlayer {
                 .fontWeight(FontWeight.Bold)
                 .opacity(this.plusOneOpacity)
                 .offset({ y: this.plusOneOffsetY })
-                .position({ x: '50%', y: '50%' }) // 相对于Stack居中
-                .offset({ x: 0, y: -50 }); // 微调位置，使其在图标上方
+                .position({ x: '50%', y: '50%' })
+                .offset({ x: 0, y: -50 });
             }
           }
-          .width(40) // Stack宽度与图标一致
-          .height(40); // Stack高度与图标一致
-
-          Text('5.7w') // 示例点赞数
+          .width(40)
+          .height(40);
+          Text('5.7w')
             .fontSize(12)
             .fontColor(Color.White);
         }
-
         // 评论图标
         Column({ space: 5 }) {
-          Image($r('app.media.ic_comment')) // 评论图标
+          Image($r('app.media.ic_comment'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .backgroundColor('rgba(255, 255, 255, 0.2)');
-          Text('3208') // 示例评论数
+          Text('3208')
             .fontSize(12)
             .fontColor(Color.White);
         }
-
         // 分享图标
         Column({ space: 5 }) {
-          Image(this.isShareActive ? $r('app.media.icon_share') : $r('app.media.icon_shared')) // 分享图标
+          Image(this.isShareActive ? $r('app.media.icon_share') : $r('app.media.icon_shared'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
-              this.isShareActive = !this.isShareActive; // 切换状态
+              this.isShareActive = !this.isShareActive;
               hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Share clicked, isActive: ${this.isShareActive}`);
-              // TODO: 分享功能
             });
           Text('分享')
             .fontSize(12)
             .fontColor(Color.White);
         }
-
         // 收藏图标
         Column({ space: 5 }) {
-          Image(this.isCollectActive ? $r('app.media.icon_collected') : $r('app.media.icon_collect')) // 收藏图标
+          Image(this.isCollectActive ? $r('app.media.icon_collected') : $r('app.media.icon_collect'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
-              this.isCollectActive = !this.isCollectActive; // 切换状态
+              this.isCollectActive = !this.isCollectActive;
               hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Collect clicked, isActive: ${this.isCollectActive}`);
-              // TODO: 收藏功能
             });
           Text('收藏')
             .fontSize(12)
             .fontColor(Color.White);
         }
       }
-      .alignSelf(ItemAlign.End) // 自身对齐到父容器的末尾 (右侧)
-      .justifyContent(FlexAlign.Center) // 内部元素垂直居中
-      .height('100%') // 占据父容器的全部高度
-      .margin({ left: 15 }); // 距离右侧的边距
-      //.position({ x: '100%', y: '50%' }) // 定位在右侧垂直居中
-      //.offset({ x: -80, y: -150 }); // 调整偏移量，使其更靠右，并向上一些
+      .alignSelf(ItemAlign.End)
+      .justifyContent(FlexAlign.Center)
+      .height('50%')
+      .margin({ right: 15,top: 150 });
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#000000') // 确保背景是黑色
+    .backgroundColor('#000000')
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
   }
 }

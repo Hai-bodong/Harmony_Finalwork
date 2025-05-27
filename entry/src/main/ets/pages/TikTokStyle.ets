@@ -1,53 +1,87 @@
-import router from '@ohos.router'
-import hilog from '@ohos.hilog'
-import { VideoItem } from '../Support/videoitem'
+import router from '@ohos.router';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 const DOMAIN_TIKTOK_STYLE: number = 0x0001
+// 定义视频数据类型
+interface VideoItem {
+  id: number; // 视频ID
+  url: Resource; // 视频源
+  author: string; //  作者
+  description: string; //  视频描述
+  likes: number; //点赞数
+  comments: number; // 评论数
+  avatar: Resource; //头像
+  isLiked: boolean; // 添加点赞状态字段
+  isCollected: boolean; // 添加收藏状态字段
+  isShared: boolean; // 添加分享状态字段
+}
 
 
 @Entry
 @Component
 struct TikTokStyle {
-  @State currentTab: string = '推荐'
-  @State isPlaying: boolean = true
-  @State isLiked: boolean = false // 是否已点赞
-  @State showFloatingWindow: boolean = true
-  @State currentBottomTab: number = 2
-  @State isShareActive: boolean = false; // 是否激活分享功能
-  @State isCollected: boolean = false; // 是否已收藏
+  @State currentTab: string = '推荐' // 当前选中的标签
+  @State isPlaying: boolean = true // 播放状态
+  @State showFloatingWindow: boolean = true // 是否显示悬浮窗
+  @State currentBottomTab: number = 2 // 默认为推荐页面
   @State currentVideoIndex: number = 0; // 当前播放的视频索引
-  @State private startY: number = 0
-  @State private currentY: number = 0
-  @State private videoSrc: Resource = $r('app.media.dancing')
-  // 添加视频列表数据
-  private videoList: VideoItem[] = [
+  @State private startY: number = 0 // 开始Y坐标
+  @State private currentY: number = 0  // 当前Y坐标
+  @State showCommentInput: boolean = false // 是否显示评论输入框
+  @State commentText: string = '' // 评论内容
+  @State charCount: number = 0 // 评论字数统计
+  
+  
+  // 将videoList改为响应式状态
+  @State videoList: VideoItem[] = [
     {
       id: 1,
       url: $r('app.media.dancing'),
-      author: '舞蹈达人',
-      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      author: '原神',
+      description: '原神启动 #原神 #二次元',
       likes: 12000,
       comments: 2312,
-      avatar: $r('app.media.profile1')
+      avatar: $r('app.media.profile1'),
+      isLiked: false,
+      isCollected: false,
+      isShared: false
     },
     {
       id: 2,
       url: $r('app.media.video1'),
-      author: '舞蹈达人',
-      description: '街舞日常练习，一起感受音乐的魅力 #舞蹈 #街舞 #音乐',
+      author: '世界美景',
+      description: '一起感受自然的魅力 #风景 #自然 ',
       likes: 15000,
       comments: 3000,
-      avatar: $r('app.media.profile1')
+      avatar: $r('app.media.profile1'),
+      isLiked: false,
+      isCollected: false,
+      isShared: false
     }
   ]
 
+  // 更新视频状态的方法
+  private updateVideoState(index: number, updates: Partial<VideoItem>) {
+    let currentVideo = this.videoList[index];
+    this.videoList[index] = {
+      id: currentVideo.id,
+      url: currentVideo.url,
+      author: currentVideo.author,
+      description: currentVideo.description,
+      likes: updates.likes !== undefined ? updates.likes : currentVideo.likes,
+      comments: currentVideo.comments,
+      avatar: currentVideo.avatar,
+      isLiked: updates.isLiked !== undefined ? updates.isLiked : currentVideo.isLiked,
+      isCollected: updates.isCollected !== undefined ? updates.isCollected : currentVideo.isCollected,
+      isShared: updates.isShared !== undefined ? updates.isShared : currentVideo.isShared
+    };
+  }
 
   // 处理视频切换
   private switchVideo(direction: number) {
     const newIndex = this.currentVideoIndex + direction
     if (newIndex >= 0 && newIndex < this.videoList.length) {
       this.currentVideoIndex = newIndex
-      this.videoSrc = this.videoList[this.currentVideoIndex].url
     }
   }
 
@@ -65,6 +99,7 @@ struct TikTokStyle {
         .autoPlay(true)
         .loop(true)
         .muted(true)
+        .controls(false) //隐藏进度条
         .gesture(
           PanGesture()
             .onActionStart((event: GestureEvent) => {
@@ -114,17 +149,16 @@ struct TikTokStyle {
       Column(){
         // 点赞按钮
         Column({ space: 5 }) {
-          Image(this.isLiked ? $r('app.media.icon_like1') : $r('app.media.icon_liked1'))
+          Image(this.videoList[this.currentVideoIndex].isLiked ? $r('app.media.icon_like1') : $r('app.media.icon_liked1'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .onClick(() => {
-              this.isLiked = !this.isLiked;
-              if (this.isLiked) {
-                this.videoList[this.currentVideoIndex].likes += 1;
-              } else {
-                this.videoList[this.currentVideoIndex].likes -= 1;
-              }
+              const newLiked = !this.videoList[this.currentVideoIndex].isLiked;
+              this.updateVideoState(this.currentVideoIndex, {
+                isLiked: newLiked,
+                likes: this.videoList[this.currentVideoIndex].likes + (newLiked ? 1 : -1)
+              });
             });
 
           Text(`${this.videoList[this.currentVideoIndex].likes}`)
@@ -139,28 +173,34 @@ struct TikTokStyle {
             .width(40)
             .height(40)
             .borderRadius(20)
+            .onClick(() => {
+              this.showCommentInput = true;
+            })
           Text(`${this.videoList[this.currentVideoIndex].comments}`)
             .fontSize(12)
-            .fontColor(Color.White);
+            .fontColor(Color.White)
         }
         .margin({ bottom: 20 })
 
         // 收藏按钮
         Column({ space: 5 }) {
-          Image(this.isCollected ? $r('app.media.icon_collected') : $r('app.media.icon_collect'))
+          Image(this.videoList[this.currentVideoIndex].isCollected ? $r('app.media.icon_collected') : $r('app.media.icon_collect'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .onClick(() => {
-              this.isCollected = !this.isCollected;
-              if (this.isCollected) {
+              const newCollected = !this.videoList[this.currentVideoIndex].isCollected;
+              this.updateVideoState(this.currentVideoIndex, {
+                isCollected: newCollected
+              });
+              if (newCollected) {
                 hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video added to favorites');
               } else {
                 hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video removed from favorites');
               }
             });
 
-          Text(this.isCollected ? '已收藏' : '收藏')
+          Text(this.videoList[this.currentVideoIndex].isCollected ? '已收藏' : '收藏')
             .fontSize(12)
             .fontColor(Color.White);
         }
@@ -168,14 +208,16 @@ struct TikTokStyle {
 
         // 分享按钮
         Column({ space: 5 }) {
-          Image(this.isShareActive ? $r('app.media.icon_share') : $r('app.media.icon_shared'))
+          Image(this.videoList[this.currentVideoIndex].isShared ? $r('app.media.icon_share') : $r('app.media.icon_shared'))
             .width(40)
             .height(40)
             .borderRadius(20)
             .onClick(() => {
-              this.isShareActive = !this.isShareActive;
+              const newShared = !this.videoList[this.currentVideoIndex].isShared;
+              this.updateVideoState(this.currentVideoIndex, {
+                isShared: newShared
+              });
               hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Share button clicked');
-              // 可以在此处调用系统分享 API 或跳转至分享页面
             });
 
           Text('分享')
@@ -204,30 +246,10 @@ struct TikTokStyle {
         Text(this.videoList[this.currentVideoIndex].description)
           .fontSize(14)
           .margin({ top: 10 })
-        Row() {
-          Text('♫')
-            .fontSize(16)
-            .width(16)
-            .height(16)
-            .backgroundColor('rgba(255, 255, 255, 0.2)')
-            .borderRadius(8)
-            .textAlign(TextAlign.Center)
-          Text('街舞音乐合集 - DJ炸场')
-            .fontSize(14)
-            .margin({ left: 10 })
-        }
       }
       .width('70%')
       .position({ x: 16, y: '80%' })
 
-      // 动态字幕
-      Text('感受节奏 跟随音乐的韵律')
-        .fontSize(18)
-        .fontColor(Color.White)
-        .textShadow({ radius: 4, color: Color.Black, offsetX: 2, offsetY: 2 })
-        .position({ x: 0, y: '70%' })
-        .width('100%')
-        .textAlign(TextAlign.Center)
 
       // 底部导航栏
       Row() {
@@ -367,6 +389,57 @@ struct TikTokStyle {
           .autoPlay(true)
           .loop(true)
           .muted(true)
+          .controls(false)
+        }
+
+      // 评论输入框
+      if (this.showCommentInput) {
+        Column() {
+          Row() {
+            TextInput({ placeholder: '说点什么...', text: this.commentText })
+              .width('80%')
+              .height(40)
+              .backgroundColor('#23777777')
+              .borderRadius(20)
+              .padding({ left: 15, right: 15 })
+              .fontColor(Color.Black)
+              .placeholderColor('#999999')
+              .onChange((value: string) => {
+                this.commentText = value;
+                this.charCount = value.length;
+              })
+            
+            Button('发送')
+              .width(60)
+              .height(40)
+              .backgroundColor('#FF0050')
+              .borderRadius(20)
+              .fontColor(Color.White)
+              .onClick(() => {
+                if (this.commentText.trim() !== '') {
+                  // 清空输入框
+                  this.commentText = '';
+                  this.charCount = 0;
+                  // 隐藏输入框
+                  this.showCommentInput = false;
+                }
+              })
+          }
+          .width('100%')
+          .padding({ left: 16, right: 16 })
+          .justifyContent(FlexAlign.SpaceBetween)
+          
+          Text(`${this.charCount}/100`) //显示当前字符数
+            .fontSize(12)
+            .fontColor('#999999')
+            .margin({ top: 8, right: 16 })
+            .alignSelf(ItemAlign.End)
+        }
+        .width('100%')
+        .height(100)
+        .backgroundColor(Color.White)
+        .position({ x: 0, y: '100%' })
+        .translate({ y: -100 })
       }
     }
     .width('100%')
@@ -374,6 +447,3 @@ struct TikTokStyle {
     .backgroundColor(Color.Black)
   }
 }
-
-
-

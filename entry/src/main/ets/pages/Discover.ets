@@ -1,10 +1,12 @@
+import router from '@ohos.router';
 
-
-
+// SongItemType 接口定义，增加 audioSrc
 interface SongItemType {
   image: Resource // 图像路径
   name: string // 名称
   author: string // 作者
+  id: string
+  audioSrc: Resource // 音频文件资源路径
 }
 
 @Entry
@@ -16,91 +18,71 @@ struct Discover {
       image: $r('app.media.logo'),
       name: '让风告诉你',
       author: '《原神》',
+      id: '0000',
+      audioSrc: $rawfile('song_2.mp3')
     },
     {
       image: $r('app.media.song_cover4'),
       name: '轻涟',
       author: '芙宁娜',
+      id: '0001',
+      audioSrc: $rawfile('song_1.mp3')
     },
     {
       image: $r('app.media.song_cover5'),
       name: '我不曾忘记',
       author: '可莉',
+      id: '0002',
+      audioSrc: $rawfile('song_2.mp3')
     },
     {
       image: $r('app.media.song_cover6'),
       name: '下一个远方',
       author: '丽莎',
+      id: '0003',
+      audioSrc: $rawfile('song_1.mp3')
     },
     {
       image: $r('app.media.song_cover7'),
       name: '经过',
       author: '芭芭拉',
+      id: '0004',
+      audioSrc: $rawfile('song_2.mp3')
     },
     {
       image: $r('app.media.song_cover8'),
       name: '你呀你呀',
       author: '凯亚 ',
-    },
-    {
-      image: $r('app.media.song_cover9'),
-      name: '珍珠之歌',
-      author: '雷泽',
-    },
-    {
-      image: $r('app.media.song_cover10'),
-      name: '冰封交响曲',
-      author: '神里绫华',
-    },
-
-    {
-      image: $r('app.media.song_cover11'),
-      name: '同伴的力量',
-      author: '琴',
-    },
-    {
-      image: $r('app.media.song_cover12'),
-      name: '皎洁的笑颜',
-      author: '温迪',
-    },
-    {
-      image: $r('app.media.song_cover13'),
-      name: '璃月',
-      author: '行秋 ',
-    },
-    {
-      image: $r('app.media.song_cover14'),
-      name: '稻妻',
-      author: '珊瑚宫心海',
-    },
-    {
-      image: $r('app.media.song_cover15'),
-      name: '须弥',
-      author: '纳西妲',
-    },
-    {
-      image: $r('app.media.song_cover16'),
-      name: '枫丹',
-      author: '流浪者',
-    },
-    {
-      image: $r('app.media.song_cover17'),
-      name: '纳塔',
-      author: '娜维娅',
-    },
-    {
-      image: $r('app.media.song_cover18'),
-      name: '阿瑠的歌',
-      author: '枫原万叶',
+      id: '0005',
+      audioSrc: $rawfile('song_1.mp3')
     }
   ]
 
   build() {
     Column() {
-      Text('发现你喜欢')
-        .fontColor('#fff')
-        .width('100%')
-        .margin({ bottom: 10 })
+      Row(){
+        Image($r('app.media.icon_back'))
+          .width(24)
+          .height(24)
+          .margin({left:16})
+          .onClick(()=>{
+            if (Number(router.getLength()) > 1) {
+              router.back();
+            }
+          });
+        Text('发现你喜欢')
+          .fontColor('#fff')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .layoutWeight(1) // 占据剩余空间
+          .textAlign(TextAlign.Center)
+          .margin({ right: 24 }); // 留出右侧返回按钮的占位空间
+      }
+      .width('100%')
+      .height(56)
+      .backgroundColor('#1E1E1E')
+      .alignItems(VerticalAlign.Center)
+
       List() {
         ForEach(this.songs, (item: SongItemType, index: number) => {
           ListItem() {
@@ -111,12 +93,11 @@ struct Discover {
                   .width(80)
                   .border({ radius: 8 })
                   .margin({ right: 10 })
-                if (this.playIndex === index) {
+                if (this.playIndex === index) { // 这个playIndex主要用于Discover页面的UI指示，播放器状态由AudioPlayer管理
                   Image($r('app.media.ic_wave'))
                     .width(24)
                 }
               }
-
               // 字
               Column() {
                 Text(item.name)
@@ -141,7 +122,6 @@ struct Discover {
                 .width('100%')
               }
               .layoutWeight(1)
-
               // 更多
               Image($r('app.media.ic_more'))
                 .width(24)
@@ -152,7 +132,14 @@ struct Discover {
             .backgroundColor(Color.Black)
             .margin({ bottom: 10 })
             .onClick(() => {
-              this.playIndex = index
+              this.playIndex = index;
+              router.pushUrl({
+                url: 'pages/AudioPlayer',
+                params: {
+                  songs: this.songs,
+                  currentIndex: index,
+                }
+              });
             })
           }
         })
@@ -161,9 +148,8 @@ struct Discover {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#131313')
+    .backgroundColor('white')
     .padding({ left: 10, right: 10 })
-    // 扩充组件安全区域
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 }

@@ -1,6 +1,5 @@
 import router from '@ohos.router'
 
-// CreatePage.ets
 @Entry
 @Component
 struct CreatePage {
@@ -71,19 +70,25 @@ struct CreatePage {
 
       // 预览区域
       Stack() {
+        Column()
+          .width('100%')
+          // .aspectRatio()
+          .height(70)
+          .backgroundColor('#1a1a1a')
+
         Column() {
           Text(this.getPreviewIcon())
-            .fontSize(40)
+            .fontSize(20)
             .fontColor(Color.White)
         }
-        .width(80)
-        .height(80)
+        .width(45)
+        .height(45)
         .backgroundColor('rgba(255, 255, 255, 0.1)')
         .borderRadius(40)
         .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
       }
-      .margin({ top: 15, bottom: 15 })
+      .margin({ top: 5, bottom: 5 })
 
       // 编辑工具
       Row() {
@@ -171,7 +176,7 @@ struct CreatePage {
       Column() {
         TextArea({ placeholder: '添加视频描述...' })
           .width('100%')
-          .height(100)
+          .height(60)
           .backgroundColor('rgba(255, 255, 255, 0.1)')
           .fontColor(Color.White)
           .fontSize(16)
@@ -200,7 +205,7 @@ struct CreatePage {
       .padding(15)
       .backgroundColor('rgba(255, 255, 255, 0.1)')
       .borderRadius(8)
-      .margin(15)
+      .margin(5)
 
       // 发布选项
       Column() {
