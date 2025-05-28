@@ -260,7 +260,7 @@ struct CreatePage {
 
         // 发现
         Column() {
-          Image($r('app.media.icon_find'))
+          Image($r('app.media.icon_discover'))
             .width(24)
             .height(24)
             .objectFit(ImageFit.Contain)

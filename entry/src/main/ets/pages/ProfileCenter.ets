@@ -227,7 +227,7 @@ struct ProfileCenter {
 
           // 发现Tab
           TabContent() {
-          }.tabBar(this.buildTabBarItem(1, $r('app.media.icon_find'), '发现'))
+          }.tabBar(this.buildTabBarItem(1, $r('app.media.icon_discover'), '发现'))
 
           // 创建Tab
           TabContent() {

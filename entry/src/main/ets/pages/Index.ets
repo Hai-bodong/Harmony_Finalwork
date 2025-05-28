@@ -48,12 +48,6 @@ struct Index {
     } else {
       // 添加新页面到栈中
       this.pageStack.push(url);
-
-      // 如果栈中页面超过3个，则移除最早的页面
-      if (this.pageStack.length > 5) {
-        const removedPage = this.pageStack.shift();
-      }
-
       // 跳转到新页面
       router.pushUrl({ url: url }, router.RouterMode.Single);
     }
@@ -101,7 +95,7 @@ struct Index {
 
         // 发现Tab
         TabContent() {
-        }.tabBar(this.buildTabBarItem(1, $r('app.media.icon_find'), '发现'))
+        }.tabBar(this.buildTabBarItem(1, $r('app.media.icon_discover'), '发现'))
 
         // 创建Tab
         TabContent() {
