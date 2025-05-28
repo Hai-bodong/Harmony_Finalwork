@@ -297,9 +297,7 @@ struct Messages {
           }
         }
         .width('100%')
-        .flexGrow(1)
       }
-      .flexGrow(1)
       .backgroundColor(Color.Black) // 确保内容区域背景为黑色
 
       // 自定义底部导航栏
