@@ -142,6 +142,9 @@ struct CreatePage {
             .height(50)
             .borderRadius(8)
             .objectFit(ImageFit.Cover)
+            .onClick(()=>{
+              router.pushUrl({url: 'pages/AudioPlayer'})
+            })
 
           Column() {
             Text('晚风轻抚')

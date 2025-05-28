@@ -79,7 +79,7 @@ struct Index {
   // Tab切换处理
   onTabChange(index: number) {
     if (this.currentTabIndex !== index) {
-      this.currentTabIndex = index;
+      this.currentTabIndex = 0;
       this.navigateToPage(this.tabRoutes[index]);
     }
   }

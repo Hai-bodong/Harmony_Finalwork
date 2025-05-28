@@ -1,9 +1,5 @@
-//import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import { router } from '@kit.ArkUI'
 
-// 导入必要的模块
-const DOMAIN_AUDIO_PLAYER_PAGE = 0x0003;
 
 // SongItemType 接口定义，与 Discover.ets 中保持一致
 interface SongItemType {
@@ -57,27 +53,19 @@ struct AudioPlayer {
   private progressTimerId: number = -1;
 
   aboutToAppear() {
-    hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'AudioPlayer.ets aboutToAppear called');
 
     // 获取路由参数
     const params = router.getParams() as GeneratedTypeLiteralInterface_1;
     if (params && params.songs && params.songs.length > 0 && params.currentIndex !== undefined) {
-      hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Received params: songs count ${params.songs.length}, index ${params.currentIndex}`);
       this.songs = params.songs;
       this.currentIndex = params.currentIndex;
       this.loadSong(this.currentIndex); // 加载初始歌曲
-    } else {
-      hilog.warn(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'No valid params received or song list empty');
-      // 可以选择返回或显示错误信息
-      // router.back();
     }
-
     this.startAlbumRotation(); // 动画和进度条更新应在歌曲加载后，或根据播放状态决定
     // this.startProgressBarUpdate(); // 移到播放时启动
   }
 
   aboutToDisappear() {
-    hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'AudioPlayer.ets aboutToDisappear called');
     this.stopAlbumRotation();
     this.stopProgressBarUpdate();
   }
@@ -85,7 +73,6 @@ struct AudioPlayer {
   // 加载指定索引的歌曲信息并更新UI
   loadSong(index: number) {
     if (this.songs.length === 0 || index < 0 || index >= this.songs.length) {
-      hilog.error(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Invalid index ${index} or empty song list.`);
       return;
     }
     const song = this.songs[index];
@@ -97,7 +84,6 @@ struct AudioPlayer {
     // 重置播放状态
     this.currentTime = 0;
     this.progress = 0;
-    hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Loaded song: ${song.name} at index ${index}`);
   }
 
   // 播放下一首
@@ -149,7 +135,6 @@ struct AudioPlayer {
           this.progress = (this.currentTime / this.totalTime) * 100;
           if (this.currentTime >= this.totalTime) {
             // 播放完毕，可以自动播放下一首或停止
-            hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Song finished, playing next.');
             this.playNext(); // 自动播放下一首
           }
         }
@@ -199,7 +184,6 @@ struct AudioPlayer {
           .height(24)
           .margin({ left: 16 })
           .onClick(() => {
-            hilog.debug(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Back button clicked.');
             router.back(); // 使用 router.back() 返回上一页
           });
         Text('音乐播放')
@@ -279,7 +263,6 @@ struct AudioPlayer {
             .borderRadius(25)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Previous song clicked');
               this.playPrevious();
             });
           // 播放/暂停
@@ -294,11 +277,9 @@ struct AudioPlayer {
                 this.isAlbumRotating = true; // 确保动画开关是开的
                 this.startAlbumRotation();
                 this.startProgressBarUpdate();
-                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback started.');
               } else {
                 this.stopAlbumRotation(); // 或者只是暂停旋转的逻辑 this.isAlbumRotating = false;
                 this.stopProgressBarUpdate(); // 进度条必须停
-                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Playback paused.');
               }
             });
           // 下一首
@@ -308,7 +289,6 @@ struct AudioPlayer {
             .borderRadius(25)
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', 'Next song clicked');
               this.playNext();
             });
         }
@@ -333,7 +313,6 @@ struct AudioPlayer {
               .backgroundColor('rgba(255, 255, 255, 0.2)')
               .onClick(() => {
                 this.isLiked = !this.isLiked;
-                hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Like clicked, isLiked: ${this.isLiked}`);
                 if (this.isLiked) { // 只有点赞时才显示+1
                   this.showLikePlusOne = true;
                   this.plusOneOpacity = 1;
@@ -384,7 +363,6 @@ struct AudioPlayer {
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
               this.isShareActive = !this.isShareActive;
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Share clicked, isActive: ${this.isShareActive}`);
             });
           Text('分享')
             .fontSize(12)
@@ -399,7 +377,6 @@ struct AudioPlayer {
             .backgroundColor('rgba(255, 255, 255, 0.2)')
             .onClick(() => {
               this.isCollectActive = !this.isCollectActive;
-              hilog.info(DOMAIN_AUDIO_PLAYER_PAGE, 'AudioPlayerPage', `Collect clicked, isActive: ${this.isCollectActive}`);
             });
           Text('收藏')
             .fontSize(12)
@@ -413,7 +390,7 @@ struct AudioPlayer {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#000000')
+    .backgroundColor('#000')
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM]);
   }
 }
