@@ -22,11 +22,12 @@ struct Index {
 
   aboutToAppear() {
     this.calculateCardSize();
-    this.showInitialPrompt = false;
+    this.showInitialPrompt = true;
     this.showMessagePopup = true;
 
     setTimeout(() => {
       this.showMessagePopup = false;
+      this.showInitialPrompt = false
     }, 3000);
   }
 

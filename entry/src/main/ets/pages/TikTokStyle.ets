@@ -1,7 +1,5 @@
 import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 
-const DOMAIN_TIKTOK_STYLE: number = 0x0001
 // 定义视频数据类型
 interface VideoItem {
   id: number; // 视频ID
@@ -193,11 +191,6 @@ struct TikTokStyle {
               this.updateVideoState(this.currentVideoIndex, {
                 isCollected: newCollected
               });
-              if (newCollected) {
-                hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video added to favorites');
-              } else {
-                hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Video removed from favorites');
-              }
             });
 
           Text(this.videoList[this.currentVideoIndex].isCollected ? '已收藏' : '收藏')
@@ -217,7 +210,6 @@ struct TikTokStyle {
               this.updateVideoState(this.currentVideoIndex, {
                 isShared: newShared
               });
-              hilog.info(DOMAIN_TIKTOK_STYLE, 'TikTokStyle', 'Share button clicked');
             });
 
           Text('分享')

@@ -1,18 +1,5 @@
 import { router } from '@kit.ArkUI'
-
-
-// SongItemType 接口定义，与 Discover.ets 中保持一致
-interface SongItemType {
-  image: Resource
-  name: string
-  author: string
-  id: string // 假设歌曲有唯一ID，虽然当前切换逻辑主要依赖索引
-}
-
-interface GeneratedTypeLiteralInterface_1 {
-  songs: SongItemType[];
-  currentIndex: number;
-}
+import { SongItemType, GeneratedTypeLiteralInterface_1  } from '../Support/SongItemType'
 
 @Entry
 @Component

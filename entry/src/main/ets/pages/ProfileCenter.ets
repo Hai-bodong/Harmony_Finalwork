@@ -1,7 +1,4 @@
 import router from '@ohos.router';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-
-const DOMAIN_INDEX_PAGE = 0x0002; // 为 Index.ets 定义一个单独的DOMAIN
 
 @Entry
 @Component
@@ -27,12 +24,6 @@ struct ProfileCenter {
     } else {
       // 添加新页面到栈中
       this.pageStack.push(url);
-
-      // 如果栈中页面超过3个，则移除最早的页面
-      if (this.pageStack.length > 3) {
-        const removedPage = this.pageStack.shift();
-        hilog.info(DOMAIN_INDEX_PAGE, 'ProfileCenter', `Removed page from stack: ${removedPage}`);
-      }
 
       // 跳转到新页面
       router.pushUrl({ url: url }, router.RouterMode.Single);

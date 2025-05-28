@@ -6,3 +6,9 @@ export interface  SongItemType {
   id: string
   audioSrc: Resource // 音频文件资源路径
 }
+
+
+export  interface GeneratedTypeLiteralInterface_1 {
+  songs: SongItemType[];
+  currentIndex: number;
+}
