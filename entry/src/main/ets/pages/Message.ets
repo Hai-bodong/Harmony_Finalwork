@@ -1,6 +1,7 @@
 import router from '@ohos.router';
 import { PrivateMessage, NotificationGroup, NotificationItem } from '../Support/MessageData'
 
+
 @Entry
 @Component
 struct Messages {
